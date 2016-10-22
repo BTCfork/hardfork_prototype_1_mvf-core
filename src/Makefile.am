@@ -117,6 +117,7 @@ BITCOIN_CORE_H = \
   memusage.h \
   merkleblock.h \
   miner.h \
+  mvf-core.h \
   net.h \
   netbase.h \
   noui.h \
@@ -197,6 +198,7 @@ libbitcoin_server_a_SOURCES = \
   main.cpp \
   merkleblock.cpp \
   miner.cpp \
+  mvf-core.cpp \
   net.cpp \
   noui.cpp \
   policy/fees.cpp \
