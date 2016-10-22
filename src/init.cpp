@@ -523,7 +523,7 @@ std::string LicenseInfo()
     // todo: remove urls from translations on next change
     return FormatParagraph(strprintf(_("Copyright (C) 2009-%i The Bitcoin Core Developers"), COPYRIGHT_YEAR)) + "\n" +
            "\n" +
-           FormatParagraph(strprintf(_("Portions Copyright (C) 2016 The Bitcoin Developers"))) + "\n" +  // MVF-Core copyright (MVHF-CORE-DES-IDME-1)
+           FormatParagraph(_("Portions Copyright (C) 2016 The Bitcoin Developers")) + "\n" +  // MVF-Core copyright (MVHF-CORE-DES-IDME-1)
            "\n" +
            FormatParagraph(_("This is experimental software.")) + "\n" +
            "\n" +
