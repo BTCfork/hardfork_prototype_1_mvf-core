@@ -780,7 +780,7 @@ void InitLogging()
     fLogIPs = GetBoolArg("-logips", DEFAULT_LOGIPS);
 
     LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    LogPrintf("Bitcoin version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
+    LogPrintf("Bitcoin MVF-Core version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);  // MVF-Core identify client (MVHF-CORE-SW-REQ-11-1 / MVHF-CORE-DES-IDME-4)
 }
 
 /** Initialize bitcoin.
