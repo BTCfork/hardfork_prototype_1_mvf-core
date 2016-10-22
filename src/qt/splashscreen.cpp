@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2015 The Bitcoin Core developers
+// Copyright (c) 2016 The Bitcoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -30,6 +31,7 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     int paddingTop              = 50;
     int titleVersionVSpace      = 17;
     int titleCopyrightVSpace    = 40;
+    int titleCopyrightVSpaceBTCfork = 54;  // MVF-Core client name (MVHF-CORE-SW-REQ-11-1 / MVHF-CORE-DES-IDME-2)
 
     float fontFactor            = 1.0;
     float devicePixelRatio      = 1.0;
@@ -38,9 +40,10 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
 #endif
 
     // define text to place
-    QString titleText       = tr("Bitcoin Core");
+    QString titleText       = tr("Bitcoin MVF-Core");  // MVF-Core client name (MVHF-CORE-SW-REQ-11-1 / MVHF-CORE-DES-IDME-2)
     QString versionText     = QString("Version %1").arg(QString::fromStdString(FormatFullVersion()));
     QString copyrightText   = QChar(0xA9)+QString(" 2009-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Bitcoin Core developers"));
+    QString copyrightBTCfork = QChar(0xA9)+QString(" %1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Bitcoin developers"));  // MVF-Core client name (MVHF-CORE-SW-REQ-11-1 / MVHF-CORE-DES-IDME-2)
     QString titleAddText    = networkStyle->getTitleAddText();
 
     QString font            = QApplication::font().toString();
@@ -100,6 +103,9 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     // draw copyright stuff
     pixPaint.setFont(QFont(font, 10*fontFactor));
     pixPaint.drawText(pixmap.width()/devicePixelRatio-titleTextWidth-paddingRight,paddingTop+titleCopyrightVSpace,copyrightText);
+    // MVF-Core begin copyright (MVHF-CORE-SW-REQ-11-1 / MVHF-CORE-DES-IDME-2)
+    pixPaint.drawText(pixmap.width()/devicePixelRatio-titleTextWidth-paddingRight,paddingTop+titleCopyrightVSpaceBTCfork,copyrightBTCfork);
+    // MVF-Core end
 
     // draw additional text if special network
     if(!titleAddText.isEmpty()) {
