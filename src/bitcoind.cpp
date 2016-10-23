@@ -14,6 +14,7 @@
 #include "httpserver.h"
 #include "httprpc.h"
 #include "rpcserver.h"
+#include "mvf-core.h"  // MVF-Core
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
@@ -155,6 +156,7 @@ bool AppInit(int argc, char* argv[])
         // Set this early so that parameter interactions go to console
         InitLogging();
         InitParameterInteraction();
+        ForkSetup(Params());  // MVF-Core
         fRet = AppInit2(threadGroup, scheduler);
     }
     catch (const std::exception& e) {

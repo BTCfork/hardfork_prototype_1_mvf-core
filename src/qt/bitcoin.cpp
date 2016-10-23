@@ -20,6 +20,7 @@
 #include "splashscreen.h"
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
+#include "mvf-core.h"  // MVF-Core
 
 #ifdef ENABLE_WALLET
 #include "paymentserver.h"
@@ -657,6 +658,8 @@ int main(int argc, char *argv[])
 
     if (GetBoolArg("-splash", DEFAULT_SPLASHSCREEN) && !GetBoolArg("-min", false))
         app.createSplashScreen(networkStyle.data());
+
+    ForkSetup(Params());  // MVF-Core
 
     try
     {
