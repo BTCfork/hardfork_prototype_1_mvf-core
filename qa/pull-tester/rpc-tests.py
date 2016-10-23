@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # Copyright (c) 2014-2015 The Bitcoin Core developers
+# Copyright (c) 2016 The Bitcoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -95,6 +96,7 @@ testScripts = [
     'fundrawtransaction.py',
     'signrawtransactions.py',
     'walletbackup.py',
+    'walletbackupauto.py', # MVF-Core
     'nodehandling.py',
     'reindex.py',
     'decodescript.py',

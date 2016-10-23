@@ -35,6 +35,7 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "versionbits.h"
+#include "mvf-core.h"    // MVF-Core
 
 #include <sstream>
 
@@ -77,6 +78,7 @@ size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 bool fAlerts = DEFAULT_ALERTS;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
+bool fAutoBackupDone = false; // MVF-Core TODO: trace to design
 
 /** Fees smaller than this (in satoshi) are considered zero fee (for relaying, mining and transaction creation) */
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
@@ -2576,6 +2578,48 @@ void static UpdateTip(CBlockIndex *pindexNew) {
 
     cvBlockChange.notify_all();
 
+    // MVF-Core begin MVHF-CORE-DES-WABU-3
+    // check if we need to do wallet auto backup at pre-fork block
+    if (!fAutoBackupDone)
+    {
+        std::string strWalletBackupFile = GetArg("-autobackupwalletpath", "");
+	    int BackupBlock = GetArg("-autobackupblock", FinalActivateForkHeight - 1);
+
+        //LogPrintf("MVF DEBUG: autobackupwalletpath=%s\n",strWalletBackupFile);
+        //LogPrintf("MVF DEBUG: autobackupblock=%d\n",BackupBlock);
+
+        if (GetBoolArg("-disablewallet", false))
+        {
+            LogPrintf("MVF: -disablewallet and -autobackupwalletpath conflict so automatic backup disabled.");
+            fAutoBackupDone = true;
+        }
+        else {
+            // Auto Backup defined so check block height
+            if (chainActive.Height() >= BackupBlock )
+            {
+                if (GetMainSignals().BackupWalletAuto(strWalletBackupFile, BackupBlock))
+                    fAutoBackupDone = true;
+                else
+                    // shutdown in case of wallet backup failure (MVHF-CORE-DES-WABU-5)
+                    // MVF-Core TODO: investigate if this is safe in terms of wallet flushing/closing or if more needs to be done
+                    throw std::runtime_error("CWallet::BackupWalletAuto() : Auto wallet backup failed!");
+            }
+        }
+
+    } // if (!fAutoBackupDone)
+
+    // if trigger block height reached, perform fork activation actions (MVHF-CORE-DES-TRIG-6)
+    if (chainActive.Height() == FinalActivateForkHeight)
+    {
+        // MVF-Core TODO: decide on above condition
+        // if preparations are only made after block has been accepted, then only FinalActivateForkHeight+1 can be new rules
+        // otherwise have to activate fork at end of block before FinalActivateForkHeight
+        ActivateFork();
+    }
+
+    LogPrintf("MVF: isMVFHardForkActive=%B\n", isMVFHardForkActive);
+    // MVF-Core end
+
     // Check the version of the last 100 blocks to see if we need to upgrade:
     static bool fWarned = false;
     if (!IsInitialBlockDownload())
@@ -3818,6 +3862,13 @@ bool static LoadBlockIndexDB()
     if (it == mapBlockIndex.end())
         return true;
     chainActive.SetTip(it->second);
+
+    // MVF-Core begin
+    if (chainActive.Height() > FinalActivateForkHeight)
+    {
+        ActivateFork();
+    }
+    // MVF-Core end
 
     PruneBlockIndexCandidates();
 
