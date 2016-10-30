@@ -90,13 +90,14 @@ testScripts = [
     'mempool_limit.py',
     'httpbasics.py',
     'multi_rpc.py',
+    'mvf-core-trig.py',  # MVF-Core
     'zapwallettxes.py',
     'proxy_test.py',
     'merkle_blocks.py',
     'fundrawtransaction.py',
     'signrawtransactions.py',
     'walletbackup.py',
-    'walletbackupauto.py', # MVF-Core
+    'walletbackupauto.py',  # MVF-Core
     'nodehandling.py',
     'reindex.py',
     'decodescript.py',

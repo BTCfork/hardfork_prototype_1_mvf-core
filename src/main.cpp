@@ -2608,8 +2608,9 @@ void static UpdateTip(CBlockIndex *pindexNew) {
 
     } // if (!fAutoBackupDone)
 
-    // if trigger block height reached, perform fork activation actions (MVHF-CORE-DES-TRIG-6)
-    if (chainActive.Height() == FinalActivateForkHeight)
+    // if trigger block height reached or SegWit soft-fork activated, perform hardfork activation actions (MVHF-CORE-DES-TRIG-6)
+    if (!isMVFHardForkActive && ((chainActive.Height() == FinalActivateForkHeight)
+                                   || VersionBitsTipState(chainParams.GetConsensus(), Consensus::DEPLOYMENT_SEGWIT) == THRESHOLD_ACTIVE))
     {
         // MVF-Core TODO: decide on above condition
         // if preparations are only made after block has been accepted, then only FinalActivateForkHeight+1 can be new rules
@@ -3864,7 +3865,9 @@ bool static LoadBlockIndexDB()
     chainActive.SetTip(it->second);
 
     // MVF-Core begin
-    if (chainActive.Height() > FinalActivateForkHeight)
+    // check if hardfork needs activating
+    if (!isMVFHardForkActive && (chainActive.Height() > FinalActivateForkHeight
+                                 || VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_SEGWIT) == THRESHOLD_ACTIVE))
     {
         ActivateFork();
     }
