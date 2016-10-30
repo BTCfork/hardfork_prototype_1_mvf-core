@@ -18,6 +18,7 @@ extern std::string autoWalletBackupSuffix;  // MVHF-CORE-DES-WABU-1
 // default values that can be easily put into an enum
 enum {
 // MVHF-CORE-DES-TRIG-1 - trigger related parameter defaults
+HARDFORK_MAX_BLOCK_SIZE = 2000000,   // the fork's new maximum block size, in bytes
 // MVF-Core TODO: choose values with some consideration instead of dummy values
 HARDFORK_HEIGHT_MAINNET =  666666,   // operational network trigger height
 HARDFORK_HEIGHT_TESTNET = 9999999,   // public test network trigger height
@@ -49,7 +50,7 @@ static const CMessageHeader::MessageStartChars pchMessageStart_HardForkMainnet  
 // MVHF-CORE-DES-DIAD-1 - difficulty adjustment parameter defaults
 // MVF-Core TODO: calibrate the values for public testnets according to estimated initial present hashpower
 // values to which powLimit is reset at fork time on various networks:
-static const uint256 HARDFORK_POWLIMIT_MAINNET = uint256S("00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // mainnet
+static const uint256 HARDFORK_POWRESET_MAINNET = uint256S("00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // mainnet
                      HARDFORK_POWRESET_TESTNET = uint256S("007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // testnet
                      HARDFORK_POWRESET_REGTEST = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // regtestnet
 
