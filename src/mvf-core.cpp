@@ -13,6 +13,9 @@ using namespace std;
 // actual fork height, taking into account user configuration parameters (MVHF-CORE-DES-TRIG-4)
 int FinalActivateForkHeight = 0;
 
+// actual fork id, taking into account user configuration parameters (MVHF-CORE-DES-CSIG-1)
+int FinalForkId = 0;
+
 // track whether HF is active (MVHF-CORE-DES-TRIG-5)
 bool isMVFHardForkActive = false;
 
@@ -32,6 +35,9 @@ std::string ForkCmdLineHelp()
 
     // fork height parameter (MVHF-CORE-DES-TRIG-1)
     strUsage += HelpMessageOpt("-forkheight=<n>", strprintf(_("Block height at which to fork on active network (integer). Defaults (also minimums): mainnet:%u,testnet=%u,regtest=%u"), (unsigned)HARDFORK_HEIGHT_MAINNET, (unsigned)HARDFORK_HEIGHT_TESTNET, (unsigned)HARDFORK_HEIGHT_REGTEST));
+
+    // fork id (MVHF-CORE-DES-CSIG-1)
+    strUsage += HelpMessageOpt("-forkid=<n>", strprintf(_("Fork id to use for signature change. Value must be between 0 and %d. Default is 0x%06x (%u)"), (unsigned)MAX_HARDFORK_SIGHASH_ID, (unsigned)HARDFORK_SIGHASH_ID, (unsigned)HARDFORK_SIGHASH_ID));
 
     return strUsage;
 }
