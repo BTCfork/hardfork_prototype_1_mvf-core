@@ -16,7 +16,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-BOOST_FIXTURE_TEST_SUITE(CheckBlock_tests, BasicTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(checkblock_tests, BasicTestingSetup)  // MVF-Core: harmonize suite name with filename
 
 bool read_block(const std::string& filename, CBlock& block)
 {

@@ -16,6 +16,7 @@ enum DeploymentPos
 {
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
+    DEPLOYMENT_SEGWIT, // MFV-Core added for trigger on SegWit (BIP141/143/147) activation
     MAX_VERSION_BITS_DEPLOYMENTS
 };
 
@@ -59,6 +60,12 @@ struct Params {
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
+    // MFV-Core begin (MVHF-CORE-DES-TRIG-3)
+    int nMVFActivateForkHeight;     // trigger block height
+
+    int MVFActivateForkHeight() const { return nMVFActivateForkHeight; };
+    // MFV-Core end
+
 };
 } // namespace Consensus
 

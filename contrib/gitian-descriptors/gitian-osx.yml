@@ -1,5 +1,5 @@
 ---
-name: "bitcoin-osx-0.12"
+name: "Bitcoin-MVF-Core-osx-0.12"
 enable_cache: true
 suites:
 - "trusty"
@@ -23,7 +23,7 @@ packages:
 - "python"
 reference_datetime: "2016-01-01 00:00:00"
 remotes:
-- "url": "https://github.com/bitcoin/bitcoin.git"
+- "url": "https://github.com/BTCfork/hardfork_prototype_1_mvf-core.git"
   "dir": "bitcoin"
 files:
 - "MacOSX10.9.sdk.tar.gz"
@@ -86,7 +86,9 @@ script: |
   ./autogen.sh
   ./configure --prefix=${BASEPREFIX}/`echo "${HOSTS}" | awk '{print $1;}'`
   make dist
-  SOURCEDIST=`echo bitcoin-*.tar.gz`
+  # MVF-Core begin change client name in filename (MVHF-CORE-DES-IDME-6)
+  SOURCEDIST=`echo bitcoinMVF-Core-*.tar.gz`
+  # MVF-Core end
   DISTNAME=`echo ${SOURCEDIST} | sed 's/.tar.*//'`
 
   # Correct tar file order
@@ -123,7 +125,9 @@ script: |
     popd
 
     make deploy
-    ${WRAP_DIR}/dmg dmg Bitcoin-Core.dmg ${OUTDIR}/${DISTNAME}-osx-unsigned.dmg
+    # MVF-Core begin change client name in filename (MVHF-CORE-DES-IDME-6)
+    ${WRAP_DIR}/dmg dmg Bitcoin-MVF-Core.dmg ${OUTDIR}/${DISTNAME}-osx-unsigned.dmg
+    # MVF-Core end
 
     cd installed
     find . -name "lib*.la" -delete
