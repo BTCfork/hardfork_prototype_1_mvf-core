@@ -768,6 +768,13 @@ void InitParameterInteraction()
 #endif
     }
 
+    // MVF-Core begin warn user at start of log file if -disablewallet has turned off the wallet auto backup
+    if (GetArg("-autobackupwalletpath","") != "" && (GetBoolArg("-disablewallet", false)) )
+    {
+        LogPrintf("%s: parameter interaction: -disablewallet and -autobackupwalletpath conflict so automatic backup disabled.\n");
+    }
+    // MVF-Core end
+
     // Forcing relay from whitelisted hosts implies we will accept relays from them in the first place.
     if (GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY)) {
         if (SoftSetBoolArg("-whitelistrelay", true))
@@ -1535,6 +1542,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             else
                 pindexRescan = chainActive.Genesis();
         }
+        // MVF-Core TODO: do we need code here to handle fork-active case?
         if (chainActive.Tip() && chainActive.Tip() != pindexRescan)
         {
             //We can't rescan beyond non-pruned blocks, stop and throw an error
@@ -1625,6 +1633,19 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         while (!fRequestShutdown && chainActive.Tip() == NULL)
             MilliSleep(10);
     }
+    // MVF-Core begin
+    else {
+        // check if we're past the auto backup block height or fork height
+        if (chainActive.Height() >= FinalActivateForkHeight
+            || chainActive.Height() > GetArg("-autobackupblock", FinalActivateForkHeight - 1))
+            // MVF-Core TODO: check if SegWit is already active at height. A bit tricky at this point since versionbitscache is in main.cpp.
+        {
+            LogPrintf("MVF: AppInit2: ChainActive.Tip() exceeds fork activation height at startup - disabling wallet backup\n");
+            fAutoBackupDone = true;
+            // MVF-Core TODO: perform any other init actions needed
+        }
+    }
+    // MVF-Core end
 
     // ********************************************************* Step 11: start node
 

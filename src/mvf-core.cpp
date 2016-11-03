@@ -56,7 +56,7 @@ void ForkSetup(const CChainParams& chainparams)
 
     LogPrintf("%s: MVF: doing setup\n", __func__);
     LogPrintf("%s: MVF: active network = %s\n", __func__, activeNetworkID);
-    FinalActivateForkHeight = GetArg("-forkheight", chainparams.GetConsensus().nMVFActivateForkHeight);
+    FinalActivateForkHeight = GetArg("-forkheight", chainparams.GetConsensus().nMVFDefaultActivateForkHeight);
 
     // determine minimum fork height according to network
     // (these are set to the same as the default fork heights for now, but could be made different)
@@ -74,13 +74,26 @@ void ForkSetup(const CChainParams& chainparams)
     {
         LogPrintf("MVF: Error: specified fork height (%d) is less than minimum for '%s' network (%d)\n", FinalActivateForkHeight, activeNetworkID, minForkHeightForNetwork);
         StartShutdown();
-        FinalActivateForkHeight = minForkHeightForNetwork;
+    }
+
+    FinalForkId = GetArg("-forkid", HARDFORK_SIGHASH_ID);
+    // check fork id for validity (MVHF-CORE-DES-CSIG-2)
+    if (FinalForkId == 0) {
+        LogPrintf("MVF: Warning: fork id = 0 will result in vulnerability to replay attacks\n");
+    }
+    else {
+        if (FinalForkId < 0 || FinalForkId > MAX_HARDFORK_SIGHASH_ID) {
+            LogPrintf("MVF: Error: specified fork id (%d) is not in range 0..%u\n", FinalForkId, (unsigned)MAX_HARDFORK_SIGHASH_ID);
+            StartShutdown();
+        }
     }
 
     // we should always set the activation flag to false during setup
     isMVFHardForkActive = false;
 
-    LogPrintf("%s: MVF: ForkSetup() active fork height = %d\n", __func__, FinalActivateForkHeight);
+    LogPrintf("%s: MVF: active fork height = %d\n", __func__, FinalActivateForkHeight);
+    LogPrintf("%s: MVF: active fork id = 0x%06x (%d)\n", __func__, FinalForkId, FinalForkId);
+    LogPrintf("%s: MVF: auto backup block = %d\n", __func__, GetArg("-autobackupblock", FinalForkId - 1));
 }
 
 
@@ -88,7 +101,7 @@ void ForkSetup(const CChainParams& chainparams)
 void ActivateFork(void)
 {
     LogPrintf("%s: MVF: checking whether to perform fork activation\n", __func__);
-    if (!isMVFHardForkActive)
+    if (!isMVFHardForkActive)  // sanity check
     {
         LogPrintf("%s: MVF: performing fork activation actions\n", __func__);
         isMVFHardForkActive = true;
