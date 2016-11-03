@@ -19,6 +19,11 @@ int FinalForkId = 0;
 // track whether HF is active (MVHF-CORE-DES-TRIG-5)
 bool isMVFHardForkActive = false;
 
+// track whether auto wallet backup might still need to be done
+// this is set to true at startup if client detects fork already triggered
+// otherwise when the backup is made. (MVHF-CORE-DES-WABU-1)
+bool fAutoBackupDone = false;
+
 // default suffix to append to wallet filename for auto backup (MVHF-CORE-DES-WABU-1)
 std::string autoWalletBackupSuffix = "auto.@.bak";
 
