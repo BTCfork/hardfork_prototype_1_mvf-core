@@ -7,6 +7,7 @@
 """
 See https://github.com/BTCfork/hardfork_prototype_1_mvf-core/blob/master/doc/mvf-core-test-design.md#411
 
+
 Exercise the auto backup wallet code.  Ported from walletbackup.sh.
 
 Test case is:
@@ -32,9 +33,19 @@ Then restored using the auto backup wallets eg wallet.dat.auto.114.bak.
 Sanity check to confirm 1/2/3/4 balances match the 114 block balances.
 Sanity check to confirm 5th node does NOT perform the auto backup
 and that the debug.log contains a conflict message
+
+Node 2 is rewinded to before the backup height, and a check is made that
+an existing backup is copied to a .old file with identical contents if the
+existing backup is overwritten.
+
+Finally, node 1 is stopped, its wallet backup is deleted, and the node is
+restarted. A post-fork block is generated to check that the wallet backup
+is not re-performed once the node has already forked.
 """
 
 import os
+import fnmatch
+import hashlib
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import *
 from random import randint
@@ -60,17 +71,17 @@ class WalletBackupTest(BitcoinTestFramework):
         # as per the test design at sw-req-10-1
         extra_args = [
             ["-keypool=100",
-                "-autobackupwalletpath=%s"%(self.options.tmpdir + "/node0/newabsdir/pathandfile.@.bak"),
+                "-autobackupwalletpath=%s"%(os.path.join(self.options.tmpdir,"node0","newabsdir","pathandfile.@.bak")),
                 "-autobackupblock=%s"%(backupblock)],
             ["-keypool=100",
                 "-autobackupwalletpath=filenameonly.@.bak",
                 "-autobackupblock=%s"%(backupblock)],
             ["-keypool=100",
-                "-autobackupwalletpath=./newreldir/",
+                "-autobackupwalletpath=" + os.path.join(".","newreldir"),
                 "-autobackupblock=%s"%(backupblock)],
             ["-autobackupblock=%s"%(backupblock)],
             ["-disablewallet",
-                "-autobackupwalletpath="+self.options.tmpdir+"/node4",
+                "-autobackupwalletpath="+ os.path.join(self.options.tmpdir,"node4"),
                 "-autobackupblock=%s"%(backupblock)]]
 
         self.nodes = start_nodes(5, self.options.tmpdir, extra_args)
@@ -122,21 +133,19 @@ class WalletBackupTest(BitcoinTestFramework):
         stop_node(self.nodes[2], 2)
         stop_node(self.nodes[3], 3)
 
-    def erase_four(self):
-        os.remove(self.options.tmpdir + "/node0/regtest/wallet.dat")
-        os.remove(self.options.tmpdir + "/node1/regtest/wallet.dat")
-        os.remove(self.options.tmpdir + "/node2/regtest/wallet.dat")
-        os.remove(self.options.tmpdir + "/node3/regtest/wallet.dat")
+    def erase_hot_wallets(self):
+        for node in xrange(4):
+            os.remove(os.path.join(self.options.tmpdir,"node%s" % node,"regtest","wallet.dat"))
 
     def run_test(self):
         logging.info("Automatic backup configured for block %s"%(backupblock))
         assert_greater_than(backupblock, 113)
 
         # target backup files
-        node0backupfile = self.options.tmpdir + "/node0/newabsdir/pathandfile.%s.bak"%(backupblock)
-        node1backupfile = self.options.tmpdir + "/node1/regtest/filenameonly.%s.bak"%(backupblock)
-        node2backupfile = self.options.tmpdir + "/node2/regtest/newreldir/wallet.dat.auto.%s.bak"%(backupblock)
-        node3backupfile = self.options.tmpdir + "/node3/regtest/wallet.dat.auto.%s.bak"%(backupblock)
+        node0backupfile = os.path.join(self.options.tmpdir,"node0","newabsdir","pathandfile.%s.bak"%(backupblock))
+        node1backupfile = os.path.join(self.options.tmpdir,"node1","regtest","filenameonly.%s.bak"%(backupblock))
+        node2backupfile = os.path.join(self.options.tmpdir,"node2","regtest","newreldir","wallet.dat.auto.%s.bak"%(backupblock))
+        node3backupfile = os.path.join(self.options.tmpdir,"node3","regtest","wallet.dat.auto.%s.bak"%(backupblock))
 
         logging.info("Generating initial blockchain")
         self.nodes[0].generate(1)
@@ -220,7 +229,10 @@ class WalletBackupTest(BitcoinTestFramework):
         if os.path.isfile(node1backupfile): node1backupexists = 1
         else: logging.info("Error backup does not exist: %s"%(node1backupfile))
 
-        if os.path.isfile(node2backupfile): node2backupexists = 1
+        if os.path.isfile(node2backupfile):
+            node2backupexists = 1
+            # take MD5 for comparison to .old file in later test
+            node2backupfile_orig_md5 = hashlib.md5(open(node2backupfile, 'rb').read()).hexdigest()
         else: logging.info("Error backup does not exist: %s"%(node2backupfile))
 
         if os.path.isfile(node3backupfile): node3backupexists = 1
@@ -255,13 +267,13 @@ class WalletBackupTest(BitcoinTestFramework):
         ##
         logging.info("Switching wallets. Restoring using automatic wallet backups...")
         self.stop_four()
-        self.erase_four()
+        self.erase_hot_wallets()
 
         # Restore wallets from backup
-        shutil.copyfile(node0backupfile, tmpdir + "/node0/regtest/wallet.dat")
-        shutil.copyfile(node1backupfile, tmpdir + "/node1/regtest/wallet.dat")
-        shutil.copyfile(node2backupfile, tmpdir + "/node2/regtest/wallet.dat")
-        shutil.copyfile(node3backupfile, tmpdir + "/node3/regtest/wallet.dat")
+        shutil.copyfile(node0backupfile, os.path.join(tmpdir,"node0","regtest","wallet.dat"))
+        shutil.copyfile(node1backupfile, os.path.join(tmpdir,"node1","regtest","wallet.dat"))
+        shutil.copyfile(node2backupfile, os.path.join(tmpdir,"node2","regtest","wallet.dat"))
+        shutil.copyfile(node3backupfile, os.path.join(tmpdir,"node3","regtest","wallet.dat"))
 
         logging.info("Re-starting nodes")
         self.start_four()
@@ -286,15 +298,70 @@ class WalletBackupTest(BitcoinTestFramework):
         # when -disablewallet is enabled then no backup file should be created and graceful exit happens
         # without causing a runtime error
         node4backupexists = 0
-        if os.path.isfile(tmpdir + "/node4/regtest/wallet.dat.auto.%s.bak"%(backupblock)):
+        if os.path.isfile(os.path.join(tmpdir,"node4","regtest","wallet.dat.auto.%s.bak"%(backupblock))):
             node4backupexists = 1
             logging.info("Error: Auto backup performed on node4 with -disablewallet!")
 
         # Test Node4 debug.log contains a conflict message - length test should be > 0
-        debugmsg_list = search_file(tmpdir + "/node4/regtest/debug.log","-disablewallet and -autobackupwalletpath conflict")
+        debugmsg_list = search_file(os.path.join(tmpdir,"node4","regtest","debug.log"),"-disablewallet and -autobackupwalletpath conflict")
 
         assert_equal(0,node4backupexists)
         assert_greater_than(len(debugmsg_list),0)
+
+        # test that existing wallet backup is preserved
+        # rewind node 2's chain to before backupblock
+        logging.info("Stopping all nodes")
+        self.stop_four()
+        logging.info("Erasing blockchain on node 2 while keeping backup file")
+        shutil.rmtree(self.options.tmpdir + "/node2/regtest/blocks")
+        shutil.rmtree(self.options.tmpdir + "/node2/regtest/chainstate")
+        logging.info("Restarting node 2")
+        self.nodes[2] = start_node(2, self.options.tmpdir,["-keypool=100", "-autobackupwalletpath="+ os.path.join(".","newreldir"), "-autobackupblock=%s"%(backupblock) ])
+        # check that there is no .old yet (node 2 needs to generate a block to hit the height)
+        old_files_found=[]
+        for file in os.listdir(os.path.join(tmpdir,"node2","regtest","newreldir")):
+            if fnmatch.fnmatch(file, "wallet.dat.auto.%s.bak.*.old" % (backupblock)):
+                logging.info("old file found: %s" % file)
+                old_files_found.append(file)
+        assert_equal(0, len(old_files_found))
+        # generate enough blocks to hit the backup block height
+        # this should cause the existing backup to be saved to a timestamped .old copy
+        self.nodes[2].generate(backupblock)
+        for file in os.listdir(os.path.join(tmpdir,"node2","regtest","newreldir")):
+            if fnmatch.fnmatch(file, "*.old"):
+                old_files_found.append(file)
+        assert_equal(1, len(old_files_found))
+        # check that the contents of the .old match what we recorded earlier for node 2's backup
+        # (the file should just have been renamed)
+        logging.info("Checking .old file %s" % old_files_found[0])
+        assert_equal(node2backupfile_orig_md5,hashlib.md5(open(os.path.join(tmpdir,"node2","regtest","newreldir",old_files_found[0]), 'rb').read()).hexdigest())
+        logging.info("Checksum ok - shutting down")
+        stop_node(self.nodes[2], 2)
+        self.start_four()
+
+        # test that wallet backup is not performed again if fork has already
+        # triggered and wallet exists
+        # (otherwise it would backup a later-state wallet)
+        logging.info("stopping node 1")
+        stop_node(self.nodes[1], 1)
+        logging.info("checking that wallet backup file exists: %s" % node1backupfile)
+        assert(os.path.isfile(node1backupfile))
+        logging.info("removing wallet backup file %s" % node1backupfile)
+        os.remove(node1backupfile)
+        # check that no wallet backup file created
+        logging.info("restarting node 1")
+        self.nodes[1] = start_node(1, self.options.tmpdir, ["-keypool=100",
+                                                            "-autobackupwalletpath=filenameonly.@.bak",
+                                                            "-autobackupblock=%s"%(backupblock)])
+        logging.info("generating another block on node 1")
+        self.nodes[1].generate(1)
+        logging.info("checking that backup file has not been created again...")
+        node1backupexists = 0
+        if os.path.isfile(node1backupfile):
+            node1backupexists = 1
+            logging.info("Error: Auto backup created again on node1 after fork has already activated!")
+        assert_equal(0, node1backupexists)
+
 
 if __name__ == '__main__':
     WalletBackupTest().main()
