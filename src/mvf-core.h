@@ -12,12 +12,15 @@ class CChainParams;
 
 extern int FinalActivateForkHeight;         // MVHF-CORE-DES-TRIG-4
 extern bool isMVFHardForkActive;            // MVHF-CORE-DES-TRIG-5
+extern int FinalForkId;                     // MVHF-CORE-DES-CSIG-1
+extern bool fAutoBackupDone;                // MVHF-CORE-DES-WABU-1
 extern std::string autoWalletBackupSuffix;  // MVHF-CORE-DES-WABU-1
 
 
 // default values that can be easily put into an enum
 enum {
 // MVHF-CORE-DES-TRIG-1 - trigger related parameter defaults
+// MVF-CORE TODO: choose values with some consideration instead of dummy values
 HARDFORK_MAX_BLOCK_SIZE = 2000000,   // the fork's new maximum block size, in bytes
 // MVF-Core TODO: choose values with some consideration instead of dummy values
 HARDFORK_HEIGHT_MAINNET =  666666,   // operational network trigger height

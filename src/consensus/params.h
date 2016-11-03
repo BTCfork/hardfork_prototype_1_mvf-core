@@ -61,9 +61,9 @@ struct Params {
     int64_t nPowTargetTimespan;
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     // MFV-Core begin (MVHF-CORE-DES-TRIG-3)
-    int nMVFActivateForkHeight;     // trigger block height
+    int nMVFDefaultActivateForkHeight;     // trigger block height
 
-    int MVFActivateForkHeight() const { return nMVFActivateForkHeight; };
+    int MVFDefaultActivateForkHeight() const { return nMVFDefaultActivateForkHeight; };
     // MFV-Core end
 
 };

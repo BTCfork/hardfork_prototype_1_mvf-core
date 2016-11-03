@@ -118,7 +118,7 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
         // MFV-Core begin (MVHF-CORE-DES-TRIG-3)
         // block height at which MFV-Core hard fork activates
-        consensus.nMVFActivateForkHeight = HARDFORK_HEIGHT_MAINNET;
+        consensus.nMVFDefaultActivateForkHeight = HARDFORK_HEIGHT_MAINNET;
         // MFV-Core end
 
         assert(consensus.hashGenesisBlock == uint256S("0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
@@ -217,7 +217,7 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
         // MFV-Core begin (MVHF-CORE-DES-TRIG-3)
         // block height at which MFV-Core hard fork activates
-        consensus.nMVFActivateForkHeight = HARDFORK_HEIGHT_TESTNET;
+        consensus.nMVFDefaultActivateForkHeight = HARDFORK_HEIGHT_TESTNET;
         // MFV-Core end
 
         assert(consensus.hashGenesisBlock == uint256S("0x000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"));
@@ -299,7 +299,7 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
         // MFV-Core begin (MVHF-CORE-DES-TRIG-3)
         // block height at which MFV-Core hard fork activates
-        consensus.nMVFActivateForkHeight = HARDFORK_HEIGHT_REGTEST;
+        consensus.nMVFDefaultActivateForkHeight = HARDFORK_HEIGHT_REGTEST;
         // MFV-Core end
 
         assert(consensus.hashGenesisBlock == uint256S("0x0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"));
