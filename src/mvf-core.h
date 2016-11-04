@@ -11,7 +11,7 @@
 class CChainParams;
 
 extern int FinalActivateForkHeight;             // MVHF-CORE-DES-TRIG-4
-extern bool wasMVFHardForkPreviouslyActivated;  // MVHF-BU-DES-TRIG-5
+extern bool wasMVFHardForkPreviouslyActivated;  // MVHF-CORE-DES-TRIG-5
 extern bool isMVFHardForkActive;                // MVHF-CORE-DES-TRIG-5
 extern int FinalForkId;                         // MVHF-CORE-DES-CSIG-1
 extern bool fAutoBackupDone;                    // MVHF-CORE-DES-WABU-1
