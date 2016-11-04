@@ -10,11 +10,12 @@
 
 class CChainParams;
 
-extern int FinalActivateForkHeight;         // MVHF-CORE-DES-TRIG-4
-extern bool isMVFHardForkActive;            // MVHF-CORE-DES-TRIG-5
-extern int FinalForkId;                     // MVHF-CORE-DES-CSIG-1
-extern bool fAutoBackupDone;                // MVHF-CORE-DES-WABU-1
-extern std::string autoWalletBackupSuffix;  // MVHF-CORE-DES-WABU-1
+extern int FinalActivateForkHeight;             // MVHF-CORE-DES-TRIG-4
+extern bool wasMVFHardForkPreviouslyActivated;  // MVHF-CORE-DES-TRIG-5
+extern bool isMVFHardForkActive;                // MVHF-CORE-DES-TRIG-5
+extern int FinalForkId;                         // MVHF-CORE-DES-CSIG-1
+extern bool fAutoBackupDone;                    // MVHF-CORE-DES-WABU-1
+extern std::string autoWalletBackupSuffix;      // MVHF-CORE-DES-WABU-1
 
 
 // default values that can be easily put into an enum
@@ -58,6 +59,8 @@ static const uint256 HARDFORK_POWRESET_MAINNET = uint256S("00007ffffffffffffffff
                      HARDFORK_POWRESET_TESTNET = uint256S("007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // testnet
                      HARDFORK_POWRESET_REGTEST = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // regtestnet
 
+// MVHF-CORE-DES-TRIG-10 - config file that is written when forking, and used to detect "forked" condition at start
+const char * const BTCFORK_CONF_FILENAME = "btcfork.conf";
 
 extern std::string ForkCmdLineHelp();  // fork-specific command line option help (MVHF-CORE-DES-TRIG-8)
 extern void ForkSetup(const CChainParams& chainparams);  // actions to perform at program setup (parameter validation etc.)
