@@ -1636,11 +1636,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     // MVF-Core begin
     else {
         // check if we're past the auto backup block height or fork height
-        if (chainActive.Height() >= FinalActivateForkHeight
+        if (wasMVFHardForkPreviouslyActivated || chainActive.Height() >= FinalActivateForkHeight
             || chainActive.Height() > GetArg("-autobackupblock", FinalActivateForkHeight - 1))
             // MVF-Core TODO: check if SegWit is already active at height. A bit tricky at this point since versionbitscache is in main.cpp.
         {
-            LogPrintf("MVF: AppInit2: ChainActive.Tip() exceeds fork activation height at startup - disabling wallet backup\n");
+            LogPrintf("MVF: AppInit2: Fork already activated or ChainActive.Tip() exceeds fork activation height at startup - disabling wallet backup\n");
             fAutoBackupDone = true;
             // MVF-Core TODO: perform any other init actions needed
         }
