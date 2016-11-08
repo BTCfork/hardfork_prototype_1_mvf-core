@@ -3700,9 +3700,11 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes)
 {
     uint64_t nFreeBytesAvailable = boost::filesystem::space(GetDataDir()).available;
 
+    // MVF-Core begin temporarily disabled disk space check to test on ramdisk
     // Check for nMinDiskSpace bytes (currently 50MB)
-    if (nFreeBytesAvailable < nMinDiskSpace + nAdditionalBytes)
-        return AbortNode("Disk space is low!", _("Error: Disk space is low!"));
+    //if (nFreeBytesAvailable < nMinDiskSpace + nAdditionalBytes)
+    //    return AbortNode("Disk space is low!", _("Error: Disk space is low!"));
+    // MVF-Core end
 
     return true;
 }

@@ -9,6 +9,8 @@
 #include "uint256.h"
 #include <map>
 #include <string>
+#include <math.h>  // MVF-Core
+#include "mvf-core.h"  // MVF-Core
 
 namespace Consensus {
 
@@ -64,6 +66,53 @@ struct Params {
     int nMVFDefaultActivateForkHeight;     // trigger block height
 
     int MVFDefaultActivateForkHeight() const { return nMVFDefaultActivateForkHeight; };
+    int MVFRetargetPeriodEnd() const { return  FinalActivateForkHeight + (180 * 24 * 60 * 60 / nPowTargetSpacing); }
+
+    //int64_t MVFPowTargetTimespan(int Height) const { return (Height - MVFDefaultActivateForkHeight()) * nPowTargetSpacing; }
+
+    int64_t MVFPowTargetTimespan(int Height) const
+    {
+        int MVFHeight = Height - FinalActivateForkHeight;
+
+        switch (MVFHeight)
+        {
+            case    1 ...
+                    10: return nPowTargetSpacing;           // 10 minutes (abrupt retargeting permitted)
+
+            case    11 ...
+                    40: return nPowTargetSpacing * 3;       // 30 minutes
+
+            case    41 ...
+                    101: return nPowTargetSpacing * 6;      // 1 hour
+
+            case    102 ...
+                    2000: return nPowTargetSpacing * 6 * 3; // 3 hours
+
+            default : return nPowTargetSpacing * 6 * 12;    // 12 hours
+        }
+
+    }
+
+    bool MVFisWithinRetargetPeriod(int Height) const
+    {
+        if (Height >= FinalActivateForkHeight && Height < MVFRetargetPeriodEnd() )
+            return true;
+        else
+            return false;
+    }
+
+    int64_t DifficultyAdjustmentInterval(int Height) const
+    {
+        // if outside the MVFRetargetPeriod then use the original values
+        if (MVFisWithinRetargetPeriod(Height)) {
+            // re-target MVF
+            return MVFPowTargetTimespan(Height) / nPowTargetSpacing;
+        }
+        else {
+            // re-retarget original
+            return nPowTargetTimespan / nPowTargetSpacing;
+        }
+    }
     // MFV-Core end
 
 };
