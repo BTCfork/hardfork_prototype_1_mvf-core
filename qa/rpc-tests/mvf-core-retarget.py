@@ -17,7 +17,7 @@ from datetime import datetime
 
 BLOCK_SPACING=600               # seconds
 SPACING_WINDOW_TIGHT=100        # +- this many seconds for normal blocks
-IDEAL_REALTIME_PER_BLOCK=0.3    # seconds
+IDEAL_REALTIME_PER_BLOCK=0.5    # seconds
 SPECIAL_PERIOD=180*144          # ~180 days worth of blocks
 
 class MVF_RETARGET_Test(BitcoinTestFramework):
@@ -118,8 +118,8 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
                     else:
                         middle *= 2  # slighly stretch block times to lower difficulty so that real time per block becomes faster
                         window_size /= 2  # narrow the window
-                self.nodes[0].setmocktime(best_block['time'] + randint(middle - window_size,
-                                                                       middle + window_size))
+                self.nodes[0].setmocktime(best_block['time'] + randint(int(middle - window_size),
+                                                                       int(middle + window_size)))
 
             self.nodes[0].generate(1)
 
