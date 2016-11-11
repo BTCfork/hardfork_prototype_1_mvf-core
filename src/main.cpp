@@ -3865,7 +3865,7 @@ bool static LoadBlockIndexDB()
 
     // MVF-Core begin
     // check if hardfork needs activating
-    if (!isMVFHardForkActive && (chainActive.Height() > FinalActivateForkHeight
+    if (!isMVFHardForkActive && (chainActive.Height() >= FinalActivateForkHeight
                              || VersionBitsTipState(chainparams.GetConsensus(), Consensus::DEPLOYMENT_SEGWIT) == THRESHOLD_ACTIVE))
     {
         ActivateFork();
