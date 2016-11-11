@@ -52,7 +52,7 @@ class MVF_TRIG_Test(BitcoinTestFramework):
         # MVF-Core TODO: extend to check using RPC info about forks
         nodelog = self.options.tmpdir + "/node%s/regtest/debug.log" % node
         hf_active = (search_file(nodelog, "isMVFHardForkActive=1") and
-                     search_file(nodelog, "setting isMVFHardForkActive"))
+                     search_file(nodelog, "enabling isMVFHardForkActive"))
         fork_actions_performed = search_file(nodelog, "MVF: performing fork activation actions")
         return (len(hf_active) > 0 and len(fork_actions_performed) == 1)
 
@@ -124,6 +124,8 @@ class MVF_TRIG_Test(BitcoinTestFramework):
         self.start_all_nodes()
         for n in xrange(4):
             assert_equal(True, self.prior_fork_detected_on_node(n))
+            nodelog=os.path.join(self.options.tmpdir,"node%d" % n,"regtest","debug.log")
+            assert(len(search_file(nodelog, "enabling isMVFHardForkActive")) == 1)
         print "Prior fork activation detected on all nodes"
 
 if __name__ == '__main__':
