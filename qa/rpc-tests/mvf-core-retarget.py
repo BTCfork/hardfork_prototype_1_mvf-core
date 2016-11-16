@@ -17,7 +17,7 @@ from datetime import datetime
 
 BLOCK_SPACING=600               # seconds
 SPACING_WINDOW_TIGHT=100        # +- this many seconds for normal blocks
-IDEAL_REALTIME_PER_BLOCK=0.5    # seconds
+IDEAL_REALTIME_PER_BLOCK=0.8    # seconds
 SPECIAL_PERIOD=180*144          # ~180 days worth of blocks
 
 class MVF_RETARGET_Test(BitcoinTestFramework):
@@ -31,14 +31,6 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
         self.is_network_split = False
         self.nodes.append(start_node(0, self.options.tmpdir,
                             ["-forkheight=100", "-force-retarget" ]))
-        #self.nodes.append(start_node(1, self.options.tmpdir,
-                            #["-forkheight=200", ]))
-        #self.nodes.append(start_node(2, self.options.tmpdir,
-                            #["-forkheight=999999",
-                             #"-blockversion=%s" % 0x20000002])) # signal SegWit
-        #self.nodes.append(start_node(3, self.options.tmpdir,
-                            #["-forkheight=300",
-                             #"-blockversion=%s" % 0x20000002])) # signal SegWit, but forkheight should pre-empt
 
     def is_fork_triggered_on_node(self, node=0):
         """ check in log file if fork has triggered and return true/false """
@@ -98,12 +90,6 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
                     last_retarget_block_timestamp = best_block['time']
                     last_wallclock_timestamp = timenow
 
-            #print "%s :: %s :: %f :: %s" %(
-                #best_block['height'],
-                #time.strftime("%H:%M",time.gmtime(best_block['time'])),
-                #best_block['difficulty'],
-                #best_block['bits'])
-
             if n <= 36 :
                 # simulate slow blocks just after the fork i.e. low hash power/high difficulty
                 self.nodes[0].setmocktime(best_block['time'] + randint(4000,8000))
@@ -127,8 +113,6 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
         #end for n in xrange
 
         print "Done."
-        #print "Done. Check the logs now or press enter to shutdown test."
-        #raw_input()
 
 if __name__ == '__main__':
     MVF_RETARGET_Test().main()
