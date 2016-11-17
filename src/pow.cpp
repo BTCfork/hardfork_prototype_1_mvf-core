@@ -70,13 +70,22 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
 {
-    static bool force_retarget=GetBoolArg("-force-retarget", false);  // MVF-Core
+    static bool force_retarget=GetBoolArg("-force-retarget", false);  // MVF-Core added to test retargeting
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit); // MVF-Core moved here
 
     if (params.fPowNoRetargeting && !force_retarget)  // MVF-Core
         return pindexLast->nBits;
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
+    // MVF-Core begin check for abnormal condition
+    // This actually occurred during testing, resulting in new target == 0
+    // which could never be met
+    if (nActualTimespan == 0) {
+        LogPrintf("  MVF: nActualTimespan == 0, returning bnPowLimit\n");
+        return bnPowLimit.GetCompact();
+    }
+    // MVF-Core end
     LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
 
     // MVF-Core begin target time span while within the re-target period
@@ -97,13 +106,15 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     // MVF-Core end
 
     // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     arith_uint256 bnNew;
     arith_uint256 bnOld;
     bnNew.SetCompact(pindexLast->nBits);
     bnOld = bnNew;
+    // MVF-Core begin: move division before multiplication
+    // at regtest difficulty, the multiplication is prone to overflowing
+    bnNew /= nTargetTimespan;
     bnNew *= nActualTimespan;
-    bnNew /= nTargetTimespan;  // MVF-Core
+    // MVF-Core end
 
     if (bnNew > bnPowLimit)
         bnNew = bnPowLimit;
