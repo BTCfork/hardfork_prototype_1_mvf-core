@@ -106,18 +106,39 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     // MVF-Core end
 
     // Retarget
-    arith_uint256 bnNew;
+    arith_uint256 bnNew, bnNew1, bnNew2;
     arith_uint256 bnOld;
     bnNew.SetCompact(pindexLast->nBits);
     bnOld = bnNew;
-    // MVF-Core begin: move division before multiplication
-    // at regtest difficulty, the multiplication is prone to overflowing
-    bnNew /= nTargetTimespan;
-    bnNew *= nActualTimespan;
-    // MVF-Core end
-
-    if (bnNew > bnPowLimit)
+    // MVF-Core begin: do division before multiplication
+    // at regtest difficulty, the multiplication is prone to overflowing.
+    // we use some more variables to detect and report on such overflows,
+    // at least during testing.
+    // MVF-Core TODO: remove temporary overflow checks when no longer needed
+    bnNew1 = bnNew / nTargetTimespan;
+    bnNew2 = bnNew1 * nActualTimespan;
+    bnNew = bnNew2;
+    if (bnNew > bnPowLimit) {
         bnNew = bnPowLimit;
+        LogPrintf("MVF GetNextWorkRequired exceeded POWLIMIT, RESET\n");
+    }
+    if (bnNew2 / nActualTimespan != bnNew1) {
+        if  (nActualTimespan >= nTargetTimespan) {
+            bnNew = bnPowLimit;
+            LogPrintf("MVF GetNextWorkRequired overflow detected, RESET to POW LIMIT\n");
+        }
+        else {
+            // this case would be very unexpected - timespan shorter but
+            // still overflow... this is what we want to watch for during
+            // testing.
+            // in this case we take half the previous target, to increase
+            // difficulty to increase targets, returning the calculation to
+            // non-overflow conditions on next round...
+            bnNew = bnOld / 2;
+            LogPrintf("MVF GetNextWorkRequired overflow detected, set to bnOld / 2\n");
+        }
+    }
+    // MVF-Core end
 
     /// debug print
     LogPrintf("GetNextWorkRequired RETARGET\n");
