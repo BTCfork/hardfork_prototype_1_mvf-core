@@ -17,7 +17,7 @@ from datetime import datetime
 
 BLOCK_SPACING=600               # seconds
 SPACING_WINDOW_TIGHT=100        # +- this many seconds for normal blocks
-SPECIAL_PERIOD=185*144          # ~185 days worth of blocks
+SPECIAL_PERIOD=200*144          # ~185 days worth of blocks
 
 class MVF_RETARGET_Test(BitcoinTestFramework):
 
@@ -68,7 +68,6 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
         for n in xrange(SPECIAL_PERIOD):
             best_block_hash = self.nodes[0].getbestblockhash()
             best_block = self.nodes[0].getblock(best_block_hash, True)
-
             prev_block = self.nodes[0].getblock(best_block['previousblockhash'], True)
 
             #if prev_block <> 0 :
@@ -96,7 +95,9 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
 
             if n <= 36 :
                 # simulate slow blocks just after the fork i.e. low hash power/high difficulty
-                self.nodes[0].setmocktime(best_block['time'] + randint(4000,6000))
+                #self.nodes[0].setmocktime(best_block['time'] + randint(4000,6000))
+                # simulate fast blocks just after the fork i.e. high hash power/low difficulty
+                self.nodes[0].setmocktime(best_block['time'] + randint(100,200))
             else:
                 # simulate ontime blocks i.e. hash power/difficult around 600 secs
                 middle=BLOCK_SPACING   # the regular block spacing
