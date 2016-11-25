@@ -61,12 +61,8 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
-    int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
-    // MFV-Core begin (MVHF-CORE-DES-TRIG-3)
-    int nMVFDefaultActivateForkHeight;     // trigger block height
 
-    int MVFDefaultActivateForkHeight() const { return nMVFDefaultActivateForkHeight; };
-    int MVFRetargetPeriodEnd() const { return  FinalActivateForkHeight + (180 * 24 * 60 * 60 / nPowTargetSpacing); }
+    int MVFRetargetPeriodEnd() const { return FinalActivateForkHeight + HARDFORK_RETARGET_BLOCKS; }
 
     // return height-dependent target time span used to compute retargeting interval (MVHF-CORE-DES-DIAD-4)
     int64_t MVFPowTargetTimespan(int Height) const
@@ -75,26 +71,21 @@ struct Params {
 
         switch (MVFHeight)
         {
-            case    1 ...
-                    10: return nPowTargetSpacing;           // 10 minutes (abrupt retargeting permitted)
+            case    0 ... 10: return nPowTargetSpacing;           // 10 minutes (abrupt retargeting permitted)
 
-            case    11 ...
-                    40: return nPowTargetSpacing * 3;       // 30 minutes
+            case    11 ... 43: return nPowTargetSpacing * 3;       // 30 minutes
 
-            case    41 ...
-                    101: return nPowTargetSpacing * 6;      // 1 hour
+            case    44 ... 101: return nPowTargetSpacing * 6;      // 1 hour
 
-            case    102 ...
-                    2000: return nPowTargetSpacing * 6 * 3; // 3 hours
+            case    102 ... 2011: return nPowTargetSpacing * 6 * 3; // 3 hours
 
             default : return nPowTargetSpacing * 6 * 12;    // 12 hours
         }
-
     }
 
     bool MVFisWithinRetargetPeriod(int Height) const
     {
-        if (Height >= FinalActivateForkHeight && Height < MVFRetargetPeriodEnd() )
+        if (Height >= FinalActivateForkHeight && Height < MVFRetargetPeriodEnd())
             return true;
         else
             return false;
@@ -102,14 +93,16 @@ struct Params {
 
     int64_t DifficultyAdjustmentInterval(int Height) const
     {
+        // MVF-Core:
         // if outside the MVFRetargetPeriod then use the original values
+        // otherwise use a height-dependent window size
         if (MVFisWithinRetargetPeriod(Height)) {
-            // re-target MVF
-            return MVFPowTargetTimespan(Height) / nPowTargetSpacing;
+           // re-target MVF
+           return MVFPowTargetTimespan(Height) / nPowTargetSpacing;
         }
         else {
-            // re-target original (MVHF-CORE-DES-DIAD-4)
-            return nPowTargetTimespan / nPowTargetSpacing;
+           // re-target original (MVHF-CORE-DES-DIAD-4)
+           return nPowTargetTimespan / nPowTargetSpacing;
         }
     }
     // MFV-Core end
