@@ -18,6 +18,7 @@
 #include "txmempool.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "mvf-core.h"  // MVF-Core added
 
 #include <stdint.h>
 
@@ -650,10 +651,10 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
             "  \"headers\": xxxxxx,        (numeric) the current number of headers we have validated\n"
             "  \"bestblockhash\": \"...\", (string) the hash of the currently best block\n"
             "  \"difficulty\": xxxxxx,     (numeric) the current difficulty\n"
+            "  \"difficultyadjinterval\": xxxxxx,         (numeric) the number of blocks between difficulty adjustments\n"  // MVF-Core (MVHF-CORE-DES-DIAD-7)
             "  \"mediantime\": xxxxxx,     (numeric) median time for the current best block\n"
             "  \"verificationprogress\": xxxx, (numeric) estimate of verification progress [0..1]\n"
             "  \"chainwork\": \"xxxx\"     (string) total amount of work in active chain, in hexadecimal\n"
-            "  \"difficultyadjinterval\" : n,     (numeric) The number of blocks between difficulty adjustment \n"  // MVF-Core (MVHF-CORE-DES-DIAD-7)
             "  \"pruned\": xx,             (boolean) if the blocks are subject to pruning\n"
             "  \"pruneheight\": xxxxxx,    (numeric) heighest block available\n"
             "  \"softforks\": [            (array) status of softforks in progress\n"
@@ -675,26 +676,41 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
             "        \"status\": \"xxxx\",    (string) one of \"defined\", \"started\", \"lockedin\", \"active\", \"failed\"\n"
             "     }\n"
             "  ]\n"
+            // MVF-Core begin hardfork description (MVHF-CORE-DES-TRIG-9)
+            "  \"hardforks\": [       (array) status of hardforks in progress\n"
+            "     {\n"
+            "        \"id\": \"xxxx\",        (string) name of the hardfork (currently only \"mvhf\")\n"
+            "        \"forkheight\": \"xxxxxx\",      (numeric) block height of the hardfork (unless pre-empted by SegWit)\n"
+            "        \"forkid\": \"xxxxxx\",          (numeric) ID of the fork (used for tx signatures)\n"
+            "        \"blocks_remaining\": \"xxxxx\", (numeric) blocks remaining before fixed height activation\n"
+            "        \"segwit_status\": \"xxxx\",     (string) one of \"defined\", \"started\", \"lockedin\", \"active\", \"failed\"\n"
+            "     }\n"
+            "  ]\n"
+            // MVF-Core end
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getblockchaininfo", "")
             + HelpExampleRpc("getblockchaininfo", "")
         );
+
     LOCK(cs_main);
 
     UniValue obj(UniValue::VOBJ);
+    // MVF-Core begin relocate tip and consensusParams upwards, refactor a little
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    CBlockIndex* tip = chainActive.Tip();
     obj.push_back(Pair("chain",                 Params().NetworkIDString()));
     obj.push_back(Pair("blocks",                (int)chainActive.Height()));
     obj.push_back(Pair("headers",               pindexBestHeader ? pindexBestHeader->nHeight : -1));
-    obj.push_back(Pair("bestblockhash",         chainActive.Tip()->GetBlockHash().GetHex()));
+    obj.push_back(Pair("bestblockhash",         tip->GetBlockHash().GetHex()));
     obj.push_back(Pair("difficulty",            (double)GetDifficulty()));
-    obj.push_back(Pair("mediantime",            (int64_t)chainActive.Tip()->GetMedianTimePast()));
-    obj.push_back(Pair("verificationprogress",  Checkpoints::GuessVerificationProgress(Params().Checkpoints(), chainActive.Tip())));
-    obj.push_back(Pair("chainwork",             chainActive.Tip()->nChainWork.GetHex()));
+    obj.push_back(Pair("difficultyadjinterval", consensusParams.DifficultyAdjustmentInterval(tip->nHeight)));  // MVF-Core (MVHF-CORE-DES-DIAD-7)
+    obj.push_back(Pair("mediantime",            (int64_t)tip->GetMedianTimePast()));
+    obj.push_back(Pair("verificationprogress",  Checkpoints::GuessVerificationProgress(Params().Checkpoints(), tip)));
+    obj.push_back(Pair("chainwork",             tip->nChainWork.GetHex()));
     obj.push_back(Pair("pruned",                fPruneMode));
+    // MVF-Core end
 
-    const Consensus::Params& consensusParams = Params().GetConsensus();
-    CBlockIndex* tip = chainActive.Tip();
     UniValue softforks(UniValue::VARR);
     UniValue bip9_softforks(UniValue::VARR);
     softforks.push_back(SoftForkDesc("bip34", 2, tip, consensusParams));
@@ -704,7 +720,6 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
     bip9_softforks.push_back(BIP9SoftForkDesc("segwit", consensusParams, Consensus::DEPLOYMENT_SEGWIT)); // MVF-Core (MVHF-CORE-DES-TRIG-9)
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
-    obj.push_back(Pair("difficultyadjinterval", consensusParams.DifficultyAdjustmentInterval(tip->nHeight)));  // MVF-Core (MVHF-CORE-DES-DIAD-7)
 
     // MVF-Core begin output hardfork description (MVHF-CORE-DES-TRIG-9)
     if (!isMVFHardForkActive)
