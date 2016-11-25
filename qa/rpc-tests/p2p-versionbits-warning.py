@@ -69,7 +69,11 @@ class VersionBitsWarningTest(BitcoinTestFramework):
         # Open and close to create zero-length file
         with open(self.alert_filename, 'w') as f:
             pass
-        self.node_options = ["-debug", "-logtimemicros=1", "-alertnotify=echo %s >> \"" + self.alert_filename + "\""]
+        # MVF-Core begin added forkheight
+        # MVF-Core TODO: clarify why fork diff reset to 0x207eeeee at default forkheight 100 produces interference with this test
+        #              once that problem is sorted out, remove the forkheight parameter again
+        self.node_options = ["-forkheight=999999", "-debug", "-logtimemicros=1", "-alertnotify=echo %s >> \"" + self.alert_filename + "\""]
+        # MVF-Core end
         self.nodes.append(start_node(0, self.options.tmpdir, self.node_options))
 
         import re

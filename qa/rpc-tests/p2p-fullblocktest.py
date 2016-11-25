@@ -40,6 +40,16 @@ class FullBlockTest(ComparisonTestFramework):
         self.tip = None
         self.blocks = {}
 
+    # MVF-Core begin added setup_network to work around default regtest fork height interference with this test
+    # MVF-Core TODO: clarify why fork diff reset to 0x207eeeee at default forkheight 100 produces interference with this test
+    #                once that problem is sorted out, remove the forkheight parameter again
+    #                for now, set the forkheight to workaround this interference.
+    def setup_network(self):
+        self.nodes = start_nodes(1, self.options.tmpdir,
+                                 extra_args=[['-forkheight=999999', '-debug', '-whitelist=127.0.0.1', ]],
+                                 binary=[self.options.testbinary])
+    # MVF-Core end
+
     def run_test(self):
         test = TestManager(self, self.options.tmpdir)
         test.add_all_connections(self.nodes)
