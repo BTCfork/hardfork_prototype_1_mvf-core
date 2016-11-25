@@ -2622,7 +2622,6 @@ void static UpdateTip(CBlockIndex *pindexNew) {
     LogPrintf("MVF: isMVFHardForkActive=%B\n", isMVFHardForkActive);
     // MVF-Core end
 
-
     // Check the version of the last 100 blocks to see if we need to upgrade:
     static bool fWarned = false;
     if (!IsInitialBlockDownload())
