@@ -100,29 +100,28 @@ BOOST_AUTO_TEST_CASE(GetBlockProofEquivalentTime_test)
 }
 
 // MVF-Core begin
-// added unit test after we found that on regtest, difficulty calculation
-// can lead to overflow of 256-bit integer.
-// We reversed the order of multiplication and division so that the
-// division is done first.
-BOOST_AUTO_TEST_CASE(MVFCheckDiffCalculation_test)
+/* added unit test after we found that on regtest, difficulty calculation
+   can lead to overflow of 256-bit integer. Here an excessive retarget time
+   is set in order to trigger the overflow case, in which case the previous
+   difficulty is re-used. */
+BOOST_AUTO_TEST_CASE(MVFCheckOverflowCalculation_test)
 {
     SelectParams(CBaseChainParams::REGTEST);
     const Consensus::Params& params = Params().GetConsensus();
-    arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
-    arith_uint256 bnNew;
-    arith_uint256 bnOld;
-    unsigned int oldnBits = 0x1f10f1aa;
-    int64_t nTargetTimespan = 3600, nActualTimespan = 3880;
-    bnNew.SetCompact(oldnBits);
-    bnOld = bnNew;
-    bnNew /= nTargetTimespan;   // division first, else might overflow
-    bnNew *= nActualTimespan;
 
-    if (bnNew > bnPowLimit)
-        bnNew = bnPowLimit;
+    FinalActivateForkHeight = 2016;
 
-    BOOST_CHECK_EQUAL(bnOld.ToString(), "0010f1aa00000000000000000000000000000000000000000000000000000000");
-    BOOST_CHECK_EQUAL(bnNew.ToString(), "00124309b60b60b60b60b60b60b60b60b60b60b60b60b60b60b60b60b60b5218");
+    int64_t nLastRetargetTime = 7;  // Force an excessive retarget time to trigger overflow
+    CBlockIndex pindexLast;
+    pindexLast.nHeight = 2024;
+    pindexLast.nTime = 1279297671;  // Block #68543
+    pindexLast.nBits = 0x207aaaaa;  // Almost overflowing already
+
+    // an overflow causes the POW limit to be returned
+    // need to set -force-retarget, otherwise cannot test overflow
+    // because it would never reach the computation
+    SoftSetBoolArg("-force-retarget", true);
+    BOOST_CHECK_EQUAL(CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, params), 0x207fffff);
 }
 // MVF-Core end
 
