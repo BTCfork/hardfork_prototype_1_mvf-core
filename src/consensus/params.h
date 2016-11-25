@@ -68,8 +68,7 @@ struct Params {
     int MVFDefaultActivateForkHeight() const { return nMVFDefaultActivateForkHeight; };
     int MVFRetargetPeriodEnd() const { return  FinalActivateForkHeight + (180 * 24 * 60 * 60 / nPowTargetSpacing); }
 
-    //int64_t MVFPowTargetTimespan(int Height) const { return (Height - MVFDefaultActivateForkHeight()) * nPowTargetSpacing; }
-
+    // return height-dependent target time span used to compute retargeting interval (MVHF-CORE-DES-DIAD-4)
     int64_t MVFPowTargetTimespan(int Height) const
     {
         int MVFHeight = Height - FinalActivateForkHeight;
@@ -109,7 +108,7 @@ struct Params {
             return MVFPowTargetTimespan(Height) / nPowTargetSpacing;
         }
         else {
-            // re-retarget original
+            // re-target original (MVHF-CORE-DES-DIAD-4)
             return nPowTargetTimespan / nPowTargetSpacing;
         }
     }

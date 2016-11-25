@@ -23,7 +23,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (pindexLast == NULL)
         return nProofOfWorkLimit;
 
-    // MVF-Core begin difficulty re-targeting reset
+    // MVF-Core begin difficulty re-targeting reset (MVHF-CORE-DES-DIAD-2)
 	if (pindexLast->nHeight == FinalActivateForkHeight)
 	{
         LogPrintf("MVF: FORK BLOCK DIFFICULTY RESET  %08x  \n", pindexLast->nBits);
@@ -70,7 +70,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
 {
-    static bool force_retarget=GetBoolArg("-force-retarget", false);  // MVF-Core added to test retargeting
+    static bool force_retarget=GetBoolArg("-force-retarget", false);  // MVF-Core added to test retargeting (MVHF-CORE-DES-DIAD-6)
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit); // MVF-Core moved here
 
     if (params.fPowNoRetargeting && !force_retarget)  // MVF-Core
@@ -88,12 +88,13 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     // MVF-Core end
     LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
 
-    // MVF-Core begin target time span while within the re-target period
+    // MVF-Core begin
     int64_t nTargetTimespan = params.nPowTargetTimespan; // the original 14 days
+    // if in MVF fork recovery period, use faster retarget time span (MVHF-CORE-DES-DIAD-3)
     if (params.MVFisWithinRetargetPeriod(pindexLast->nHeight))
         nTargetTimespan = params.MVFPowTargetTimespan(pindexLast->nHeight);
 
-    // permit abrupt changes for a few blocks after the fork i.e. when nTargetTimespan is < 30 minutes
+    // permit abrupt changes for a few blocks after the fork i.e. when nTargetTimespan is < 30 minutes (MVHF-CORE-DES-DIAD-5)
     if (nTargetTimespan >= params.nPowTargetSpacing * 3)
     {
         // prevent abrupt changes to target
@@ -154,13 +155,13 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
     bool fNegative;
     bool fOverflow;
     arith_uint256 bnTarget;
-    static bool force_retarget=GetBoolArg("-force-retarget", false);  // MVF-Core
+    static bool force_retarget=GetBoolArg("-force-retarget", false);  // MVF-Core (MVHF-CORE-DES-DIAD-6)
 
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
 
     // Check range
     // MVF-Core begin suppress trace output to enable faster test runs when
-    // -force-retarget is used for retargeting tests
+    // -force-retarget is used for retargeting tests (MVHF-CORE-DES-DIAD-6)
     if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit)) {
         if (!force_retarget)
             return error("CheckProofOfWork(): nBits below minimum work");

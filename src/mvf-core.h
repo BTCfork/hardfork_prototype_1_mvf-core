@@ -54,7 +54,7 @@ static const CMessageHeader::MessageStartChars pchMessageStart_HardForkMainnet  
 
 // MVHF-CORE-DES-DIAD-1 - difficulty adjustment parameter defaults
 // MVF-Core TODO: calibrate the values for public testnets according to estimated initial present hashpower
-// values to which powLimit is reset at fork time on various networks:
+// values to which powLimit is reset at fork time on various networks (MVHF-CORE-DES-DIAD-2):
 static const uint256 HARDFORK_POWRESET_MAINNET = uint256S("00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // mainnet
                      HARDFORK_POWRESET_TESTNET = uint256S("007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // testnet
                      HARDFORK_POWRESET_REGTEST = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // regtestnet
