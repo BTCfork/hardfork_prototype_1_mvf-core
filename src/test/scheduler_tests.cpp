@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 The Bitcoin Core developers
+// Copyright (c) 2012-2016 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -40,7 +40,8 @@ static void MicroSleep(uint64_t n)
 #endif
 }
 
-#if 0 /* Disabled for now because there is a race condition issue in this test - see #6540 */
+//#if 0 /* Disabled for now because there is a race condition issue in this test - see #6540 */
+#if 1   // MVF-Core: re-enabled so that we learn more about how this test fails, and either fix it or remove it
 BOOST_AUTO_TEST_CASE(manythreads)
 {
     seed_insecure_rand(false);

@@ -90,6 +90,8 @@ testScripts = [
     'mempool_limit.py',
     'httpbasics.py',
     'multi_rpc.py',
+    'mvf-bu-retarget.py',  # MVF-BU directly from MVF-BU marlengit:req8/retarget mvf-bu-retarget.py
+    'mvf-core-retarget.py',  # MVF-Core experimental from MVF-BU marlengit:req8/retarget mvf-bu-retarget.py
     'mvf-core-trig.py',  # MVF-Core
     'zapwallettxes.py',
     'proxy_test.py',
