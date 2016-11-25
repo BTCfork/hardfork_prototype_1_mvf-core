@@ -618,6 +618,25 @@ static UniValue BIP9SoftForkDesc(const std::string& name, const Consensus::Param
     return rv;
 }
 
+// MVF-Core begin add hard fork output (MVHF-CORE-DES-TRIG-9)
+static UniValue HardForkDesc(const std::string &name, CBlockIndex* pindex, const Consensus::Params& consensusParams)
+{
+    UniValue rv(UniValue::VOBJ);
+    rv.push_back(Pair("id", name));
+    rv.push_back(Pair("forkheight", FinalActivateForkHeight));
+    rv.push_back(Pair("forkid", FinalForkId));
+    rv.push_back(Pair("blocks_remaining", (FinalActivateForkHeight > pindex->nHeight) ? (FinalActivateForkHeight - pindex->nHeight) : 0));
+    switch (VersionBitsTipState(consensusParams, Consensus::DEPLOYMENT_SEGWIT)) {
+    case THRESHOLD_DEFINED: rv.push_back(Pair("segwit_status", "defined")); break;
+    case THRESHOLD_STARTED: rv.push_back(Pair("segwit_status", "started")); break;
+    case THRESHOLD_LOCKED_IN: rv.push_back(Pair("segwit_status", "locked_in")); break;
+    case THRESHOLD_ACTIVE: rv.push_back(Pair("segwit_status", "active")); break;
+    case THRESHOLD_FAILED: rv.push_back(Pair("segwit_status", "failed")); break;
+    }
+    return rv;
+}
+// MVF-Core end
+
 UniValue getblockchaininfo(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -634,6 +653,7 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
             "  \"mediantime\": xxxxxx,     (numeric) median time for the current best block\n"
             "  \"verificationprogress\": xxxx, (numeric) estimate of verification progress [0..1]\n"
             "  \"chainwork\": \"xxxx\"     (string) total amount of work in active chain, in hexadecimal\n"
+            "  \"difficultyadjinterval\" : n,     (numeric) The number of blocks between difficulty adjustment \n"  // MVF-Core (MVHF-CORE-DES-DIAD-7)
             "  \"pruned\": xx,             (boolean) if the blocks are subject to pruning\n"
             "  \"pruneheight\": xxxxxx,    (numeric) heighest block available\n"
             "  \"softforks\": [            (array) status of softforks in progress\n"
@@ -660,7 +680,6 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
             + HelpExampleCli("getblockchaininfo", "")
             + HelpExampleRpc("getblockchaininfo", "")
         );
-
     LOCK(cs_main);
 
     UniValue obj(UniValue::VOBJ);
@@ -682,8 +701,19 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
     softforks.push_back(SoftForkDesc("bip66", 3, tip, consensusParams));
     softforks.push_back(SoftForkDesc("bip65", 4, tip, consensusParams));
     bip9_softforks.push_back(BIP9SoftForkDesc("csv", consensusParams, Consensus::DEPLOYMENT_CSV));
+    bip9_softforks.push_back(BIP9SoftForkDesc("segwit", consensusParams, Consensus::DEPLOYMENT_SEGWIT)); // MVF-Core (MVHF-CORE-DES-TRIG-9)
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
+    obj.push_back(Pair("difficultyadjinterval", consensusParams.DifficultyAdjustmentInterval(tip->nHeight)));  // MVF-Core (MVHF-CORE-DES-DIAD-7)
+
+    // MVF-Core begin output hardfork description (MVHF-CORE-DES-TRIG-9)
+    if (!isMVFHardForkActive)
+    {
+        UniValue hardforks(UniValue::VARR);
+        hardforks.push_back(HardForkDesc("mvhf", tip, consensusParams));
+        obj.push_back(Pair("hardforks", hardforks));
+    }
+    // MVF-Core end
 
     if (fPruneMode)
     {
