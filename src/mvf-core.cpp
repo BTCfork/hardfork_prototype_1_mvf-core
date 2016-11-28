@@ -60,7 +60,7 @@ std::string ForkCmdLineHelp()
 /** Performs fork-related setup / validation actions when the program starts */
 void ForkSetup(const CChainParams& chainparams)
 {
-    int minForkHeightForNetwork = 0;
+    int defaultForkHeightForNetwork = 0;
     std:string activeNetworkID = chainparams.NetworkIDString();
 
     LogPrintf("%s: MVF: doing setup\n", __func__);
@@ -69,22 +69,15 @@ void ForkSetup(const CChainParams& chainparams)
     // determine minimum fork height according to network
     // (these are set to the same as the default fork heights for now, but could be made different)
     if (activeNetworkID == CBaseChainParams::MAIN)
-        minForkHeightForNetwork = HARDFORK_HEIGHT_MAINNET;
+        defaultForkHeightForNetwork = HARDFORK_HEIGHT_MAINNET;
     else if (activeNetworkID == CBaseChainParams::TESTNET)
-        minForkHeightForNetwork = HARDFORK_HEIGHT_TESTNET;
+        defaultForkHeightForNetwork = HARDFORK_HEIGHT_TESTNET;
     else if (activeNetworkID == CBaseChainParams::REGTEST)
-        minForkHeightForNetwork = HARDFORK_HEIGHT_REGTEST;
+        defaultForkHeightForNetwork = HARDFORK_HEIGHT_REGTEST;
     else
         throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, activeNetworkID));
 
-    FinalActivateForkHeight = GetArg("-forkheight", minForkHeightForNetwork);
-
-    // shut down immediately if specified fork height is invalid
-    if (FinalActivateForkHeight < minForkHeightForNetwork)
-    {
-        LogPrintf("MVF: Error: specified fork height (%d) is less than minimum for '%s' network (%d)\n", FinalActivateForkHeight, activeNetworkID, minForkHeightForNetwork);
-        StartShutdown();
-    }
+    FinalActivateForkHeight = GetArg("-forkheight", defaultForkHeightForNetwork);
 
     FinalForkId = GetArg("-forkid", HARDFORK_SIGHASH_ID);
     // check fork id for validity (MVHF-CORE-DES-CSIG-2)
