@@ -29,7 +29,7 @@ class InvalidTxRequestTest(ComparisonTestFramework):
     #                for now, set the forkheight to workaround this interference.
     def setup_network(self):
         self.nodes = start_nodes(1, self.options.tmpdir,
-                                 extra_args=[['-forkheight=999999', '-debug', '-whitelist=127.0.0.1', ]],
+                                 extra_args=[['-debug', '-whitelist=127.0.0.1', ]],
                                  binary=[self.options.testbinary])
     # MVF-Core end
 

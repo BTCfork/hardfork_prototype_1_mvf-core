@@ -217,7 +217,7 @@ class SendHeadersTest(BitcoinTestFramework):
         # MVF-Core begin added forkheight
         # MVF-Core TODO: clarify why fork diff reset to 0x207eeeee at default forkheight 100 produces interference with this test
         #              once that problem is sorted out, remove the forkheight parameter again
-        self.nodes = start_nodes(2, self.options.tmpdir, [["-forkheight=999999", "-debug", "-logtimemicros=1"]]*2)
+        self.nodes = start_nodes(2, self.options.tmpdir, [["-debug", "-logtimemicros=1"]]*2)
         # MVF-Core end
         connect_nodes(self.nodes[0], 1)
 
