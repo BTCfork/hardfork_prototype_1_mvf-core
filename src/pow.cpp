@@ -39,7 +39,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval(pindexLast->nHeight) != 0)  // MVF-Core: use height-dependent interval
     {
         // MVF-Core: added force parameter to enable adjusting difficulty for regtest tests
-        if (params.fPowAllowMinDifficultyBlocks && !GetBoolArg("-force-retarget", false))
+        if (params.fPowAllowMinDifficultyBlocks && !GetBoolArg("-force-retarget", DEFAULT_FORCE_RETARGET))
         {
             // Special difficulty rule for testnet:
             // If the new block's timestamp is more than 2* 10 minutes
