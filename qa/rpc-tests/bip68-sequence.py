@@ -26,8 +26,12 @@ class BIP68Test(BitcoinTestFramework):
 
     def setup_network(self):
         self.nodes = []
-        self.nodes.append(start_node(0, self.options.tmpdir, ["-debug", "-blockprioritysize=0"]))
-        self.nodes.append(start_node(1, self.options.tmpdir, ["-debug", "-blockprioritysize=0", "-acceptnonstdtxn=0"]))
+        # MVF-Core begin disable HF activation on SegWit due to interference with this test
+        # actually it is the difficulty reset to non-POW-limit that is problematic for framework
+        # see https://github.com/BTCfork/hardfork_prototype_1_mvf-core/issues/9
+        self.nodes.append(start_node(0, self.options.tmpdir, ["-nosegwitfork", "-debug", "-blockprioritysize=0"]))
+        self.nodes.append(start_node(1, self.options.tmpdir, ["-nosegwitfork", "-debug", "-blockprioritysize=0", "-acceptnonstdtxn=0"]))
+        # MVF-Core end
         self.is_network_split = False
         self.relayfee = self.nodes[0].getnetworkinfo()["relayfee"]
         connect_nodes(self.nodes[0], 1)
