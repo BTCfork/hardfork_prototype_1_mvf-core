@@ -142,10 +142,32 @@ if ENABLE_ZMQ == 1:
     testScripts.append(RpcTest('zmq_test'))
 
 
+def show_wrapper_options():
+    """ print command line options specific to wrapper """
+    print "Wrapper options:"
+    print
+    print "  -extended             run the extended set of tests"
+    print "  -only-extended / -extended-only\n" + \
+          "                        run ONLY the extended tests"
+    print "  -list                 only list test names"
+
 def runtests():
     coverage = None
 
-    run_only_extended = '-only-extended' in opts
+    run_only_extended = ('-only-extended' in opts or '-extended-only' in opts)
+
+    if '-list' in opts:
+        if run_only_extended:
+            #for i in range(len(testScriptsExt)):
+            for t in testScriptsExt:
+                print t
+        else:
+            for t in testScripts:
+                print t
+            if '-extended' in opts:
+                for t in testScriptsExt:
+                    print t
+        sys.exit(0)
 
     if ENABLE_COVERAGE:
         coverage = RPCCoverage()
@@ -177,13 +199,16 @@ def runtests():
                     time0 = time.time()
                     subprocess.check_call(
                         rpcTestDir + repr(testScripts[i]) + flags, shell=True)
-                    print("Duration: %s s\n" % (int(time.time() - time0)))
 
                     # exit if help is called so we print just one set of
                     # instructions
                     p = re.compile(" -h| --help")
                     if p.match(passOn):
+                        # print the wrapper-specific help options
+                        show_wrapper_options()
                         sys.exit(0)
+                    else:
+                        print("Duration: %s s\n" % (int(time.time() - time0)))
 
         # Run Extended Tests
         for i in range(len(testScriptsExt)):
