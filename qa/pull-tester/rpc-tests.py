@@ -120,6 +120,8 @@ for o in opts | double_opts:
         if o not in private_single_opts:
             print bad_opt_str % o
             bad_opts_found.append(o)
+            print "Run with -h to get help on usage."
+            sys.exit(1)
 
 #Set env vars
 buildDir = BUILDDIR
