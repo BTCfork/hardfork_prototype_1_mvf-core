@@ -11,11 +11,17 @@ This module calls down into individual test cases via subprocess. It will
 forward all unrecognized arguments onto the individual test scripts, other
 than:
 
+    - `-h` or '--help': print help about all options
     - `-extended`: run the "extended" test suite in addition to the basic one.
+    - `-extended-only`: run ONLY the "extended" test suite
+    - `-list`: only list the test scripts, do not run. Works in combination
+      with '-extended' and '-extended-only' too, to print subsets.
     - `-win`: signal that this is running in a Windows environment, and we
       should run the tests.
     - `--coverage`: this generates a basic coverage report for the RPC
       interface.
+
+For more detailed help on options, run with '--help'.
 
 For a description of arguments recognized by test scripts, see
 `qa/pull-tester/test_framework/test_framework.py:BitcoinTestFramework.main`.
@@ -47,8 +53,39 @@ ENABLE_COVERAGE=0
 
 #Create a set to store arguments and create the passOn string
 opts = set()
+double_opts = set()  # BU: added for checking validity of -- opts
 passOn = ""
 p = re.compile("^--")
+# some of the single-dash options applicable only to this runner script
+# are also allowed in double-dash format (but are not passed on to the
+# test scripts themselves)
+private_single_opts = ('-h',
+                       '-help',
+                       '-list',
+                       '-extended',
+                       '-extended-only',
+                       '-only-extended',
+                       '-win')
+private_double_opts = ('--list',
+                       '--extended',
+                       '--extended-only',
+                       '--only-extended',
+                       '--win')
+test_script_opts = ('--tracerpc',
+                    '--help',
+                    '--noshutdown',
+                    '--nocleanup',
+                    '--srcdir',
+                    '--tmpdir',
+                    '--coveragedir',
+                    '--randomseed',
+                    '--testbinary',
+                    '--refbinary')
+
+def option_passed(option_without_dashes):
+    """check if option was specified in single-dash or double-dash format"""
+    return ('-' + option_without_dashes in opts
+            or '--' + option_without_dashes in double_opts)
 
 bold = ("","")
 if (os.name == 'posix'):
@@ -57,10 +94,36 @@ if (os.name == 'posix'):
 for arg in sys.argv[1:]:
     if arg == '--coverage':
         ENABLE_COVERAGE = 1
-    elif (p.match(arg) or arg == "-h"):
-        passOn += " " + arg
+    elif (p.match(arg) or arg in ('-h', '-help')):
+        if arg not in private_double_opts:
+            if arg == '-help' or arg == '-h':
+                pass_arg = '--help'
+            else:
+                pass_arg = arg
+            passOn += " " + pass_arg
+        # add it to double_opts only for validation
+        double_opts.add(arg)
     else:
+        # this is for single-dash options only
+        # they are interpreted only by this script
         opts.add(arg)
+
+# check for unrecognized options
+bad_opts_found = []
+bad_opt_str="Unrecognized option: %s"
+for o in opts | double_opts:
+    if o.startswith('--'):
+        if o not in test_script_opts + private_double_opts:
+            print bad_opt_str % o
+            bad_opts_found.append(o)
+    elif o.startswith('-'):
+        if o not in private_single_opts:
+            print bad_opt_str % o
+            bad_opts_found.append(o)
+if bad_opts_found:
+    if not ' --help' in passOn:
+        passOn += ' --help'
+
 
 #Set env vars
 buildDir = BUILDDIR
@@ -70,7 +133,7 @@ if "BITCOINCLI" not in os.environ:
     os.environ["BITCOINCLI"] = buildDir + '/src/bitcoin-cli' + EXEEXT
 
 #Disable Windows tests by default
-if EXEEXT == ".exe" and "-win" not in opts:
+if EXEEXT == ".exe" and not option_passed('win'):
     print "Win tests currently disabled.  Use -win option to enable"
     sys.exit(0)
 
@@ -146,17 +209,20 @@ def show_wrapper_options():
     """ print command line options specific to wrapper """
     print "Wrapper options:"
     print
-    print "  -extended             run the extended set of tests"
+    print "  -extended/--extended  run the extended set of tests"
     print "  -only-extended / -extended-only\n" + \
+          "  --only-extended / --extended-only\n" + \
           "                        run ONLY the extended tests"
-    print "  -list                 only list test names"
+    print "  -list / --list        only list test names"
+    print "  -win / --win          signal running on Windows and run those tests"
+    print "  -h / -help / --help   print this help"
 
 def runtests():
     coverage = None
 
-    run_only_extended = ('-only-extended' in opts or '-extended-only' in opts)
+    run_only_extended = option_passed('only-extended') or option_passed('extended-only')
 
-    if '-list' in opts:
+    if option_passed('list'):
         if run_only_extended:
             #for i in range(len(testScriptsExt)):
             for t in testScriptsExt:
@@ -164,7 +230,7 @@ def runtests():
         else:
             for t in testScripts:
                 print t
-            if '-extended' in opts:
+            if option_passed('extended'):
                 for t in testScriptsExt:
                     print t
         sys.exit(0)
@@ -175,15 +241,16 @@ def runtests():
 
     if(ENABLE_WALLET == 1 and ENABLE_UTILS == 1 and ENABLE_BITCOIND == 1):
         rpcTestDir = buildDir + '/qa/rpc-tests/'
-        run_extended = ('-extended' in opts) or run_only_extended
+        run_extended = option_passed('extended') or run_only_extended
         cov_flag = coverage.flag if coverage else ''
         flags = " --srcdir %s/src %s %s" % (buildDir, cov_flag, passOn)
 
         #Run Tests
+        p = re.compile(" -h| --help| -help")
         for i in range(len(testScripts)):
             if ((len(opts) == 0
-                    or (len(opts) == 1 and "-win" in opts )
-                    or run_extended
+                    or p.match(passOn)
+                    or option_passed('win')
                     or str(testScripts[i]) in opts
                     or re.sub(".py$", "", str(testScripts[i])) in opts )
                 and not run_only_extended):
@@ -200,9 +267,7 @@ def runtests():
                     subprocess.check_call(
                         rpcTestDir + repr(testScripts[i]) + flags, shell=True)
 
-                    # exit if help is called so we print just one set of
-                    # instructions
-                    p = re.compile(" -h| --help")
+                    # exit if help is called so we print just one set of instructions
                     if p.match(passOn):
                         # print the wrapper-specific help options
                         show_wrapper_options()
