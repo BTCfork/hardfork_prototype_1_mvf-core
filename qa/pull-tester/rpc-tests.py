@@ -120,10 +120,6 @@ for o in opts | double_opts:
         if o not in private_single_opts:
             print bad_opt_str % o
             bad_opts_found.append(o)
-if bad_opts_found:
-    if not ' --help' in passOn:
-        passOn += ' --help'
-
 
 #Set env vars
 buildDir = BUILDDIR
@@ -218,7 +214,9 @@ def show_wrapper_options():
     print "  -h / -help / --help   print this help"
 
 def runtests():
+    global passOn
     coverage = None
+    execution_time = {}
 
     run_only_extended = option_passed('only-extended') or option_passed('extended-only')
 
@@ -248,11 +246,13 @@ def runtests():
         #Run Tests
         p = re.compile(" -h| --help| -help")
         for i in range(len(testScripts)):
+            scriptname=re.sub(".py$", "", str(testScripts[i]).split(' ')[0])
+            #print "regular", i, str(testScripts[i]), scriptname
             if ((len(opts) == 0
                     or p.match(passOn)
                     or option_passed('win')
-                    or str(testScripts[i]) in opts
-                    or re.sub(".py$", "", str(testScripts[i])) in opts )
+                    or scriptname in opts
+                    or (scriptname + '.py') in opts )
                 and not run_only_extended):
 
                 if testScripts[i].is_disabled():
@@ -260,23 +260,33 @@ def runtests():
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScripts[i], bold[0], testScripts[i].reason))
                 else:
-                    # not disabled or skipped - execute test
+                    # not disabled or skipped - execute test (or print help if requested)
+
+                    # print the wrapper-specific help options
+                    if p.match(passOn):
+                        show_wrapper_options()
+
+                    if bad_opts_found:
+                        if not ' --help' in passOn:
+                            passOn += ' --help'
 
                     print("Running testscript %s%s%s ..." % (bold[1], testScripts[i], bold[0]))
+                    #print "call %d is: %s" % (i, rpcTestDir + repr(testScripts[i]) + flags)
                     time0 = time.time()
                     subprocess.check_call(
                         rpcTestDir + repr(testScripts[i]) + flags, shell=True)
 
-                    # exit if help is called so we print just one set of instructions
+                    # exit if help was called
                     if p.match(passOn):
-                        # print the wrapper-specific help options
-                        show_wrapper_options()
                         sys.exit(0)
                     else:
-                        print("Duration: %s s\n" % (int(time.time() - time0)))
+                        execution_time[scriptname] = int(time.time() - time0)
+                        print "Duration: %s s\n" % execution_time[scriptname]
 
         # Run Extended Tests
         for i in range(len(testScriptsExt)):
+            scriptname = re.sub(".py$", "", str(testScriptsExt[i]).split(' ')[0])
+            #print "extended", i, str(testScriptsExt[i]), scriptname
             if (run_extended or str(testScriptsExt[i]) in opts
                     or re.sub(".py$", "", str(testScriptsExt[i])) in opts):
 
@@ -284,21 +294,30 @@ def runtests():
                     print("Disabled testscript %s%s%s (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
-                else:
+                elif scriptname not in execution_time.keys():
                     # not disabled or skipped - execute test
                     print(
                         "Running 2nd level testscript "
                         + "%s%s%s ..." % (bold[1], testScriptsExt[i], bold[0]))
+                    #print "call %d is: %s" % (i, rpcTestDir + repr(testScripts[i]) + flags)
                     time0 = time.time()
                     subprocess.check_call(
                         rpcTestDir + str(testScriptsExt[i]) + flags, shell=True)
-                    print("Duration: %s s\n" % (int(time.time() - time0)))
+                    execution_time[scriptname] = int(time.time() - time0)
+                    print "Duration: %s s\n" % execution_time[scriptname]
+                else:
+                    print "Skipping extended test name %s - already executed in regular\n" % scriptname
 
         if coverage:
             coverage.report_rpc_coverage()
 
             print("Cleaning up coverage data")
             coverage.cleanup()
+
+        print
+        print "%-50s  Time (s)" % "Test"
+        for k in sorted(execution_time.keys()):
+            print "%-50s  %7s" % (k, execution_time[k])
 
     else:
         print "No rpc tests to run. Wallet, utils, and bitcoind must all be enabled"
