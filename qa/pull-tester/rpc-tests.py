@@ -253,7 +253,7 @@ def runtests():
         p = re.compile(" -h| --help| -help")
         for i in range(len(testScripts)):
             scriptname=re.sub(".py$", "", str(testScripts[i]).split(' ')[0])
-            #print "regular", i, str(testScripts[i]), scriptname
+            fullscriptcmd=str(testScripts[i])
             if ((len(opts) == 0
                     or p.match(passOn)
                     or option_passed('extended')
@@ -280,28 +280,27 @@ def runtests():
                             passOn += ' --help'
 
                     print("Running testscript %s%s%s ..." % (bold[1], testScripts[i], bold[0]))
-                    #print "call %d is: %s" % (i, rpcTestDir + repr(testScripts[i]) + flags)
                     time0 = time.time()
-                    test_passed[scriptname] = False
+                    test_passed[fullscriptcmd] = False
                     try:
                         subprocess.check_call(
                             rpcTestDir + repr(testScripts[i]) + flags, shell=True)
-                        test_passed[scriptname] = True
+                        test_passed[fullscriptcmd] = True
                     except subprocess.CalledProcessError as e:
-                        test_failure_info[scriptname] = e
+                        test_failure_info[fullscriptcmd] = e
                         #print "CalledProcessError for test %s: %s" % (scriptname, e)
 
                     # exit if help was called
                     if p.match(passOn):
                         sys.exit(0)
                     else:
-                        execution_time[scriptname] = int(time.time() - time0)
-                        print "Duration: %s s\n" % execution_time[scriptname]
+                        execution_time[fullscriptcmd] = int(time.time() - time0)
+                        print "Duration: %s s\n" % execution_time[fullscriptcmd]
 
         # Run Extended Tests
         for i in range(len(testScriptsExt)):
             scriptname = re.sub(".py$", "", str(testScriptsExt[i]).split(' ')[0])
-            #print "extended", i, str(testScriptsExt[i]), scriptname
+            fullscriptcmd=str(testScriptsExt[i])
             if (run_extended or str(testScriptsExt[i]) in opts
                     or re.sub(".py$", "", str(testScriptsExt[i])) in opts):
 
@@ -311,23 +310,22 @@ def runtests():
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
                     skipped += 1
-                elif scriptname not in execution_time.keys():
-                    # not disabled or skipped - execute test
+                elif fullscriptcmd not in execution_time.keys():
+                    # not disabled, skipped or already executed - run test
                     print(
                         "Running 2nd level testscript "
                         + "%s%s%s ..." % (bold[1], testScriptsExt[i], bold[0]))
-                    #print "call %d is: %s" % (i, rpcTestDir + repr(testScripts[i]) + flags)
                     time0 = time.time()
-                    test_passed[scriptname] = False
+                    test_passed[fullscriptcmd] = False
                     try:
                         subprocess.check_call(
                             rpcTestDir + repr(testScriptsExt[i]) + flags, shell=True)
-                        test_passed[scriptname] = True
+                        test_passed[fullscriptcmd] = True
                     except subprocess.CalledProcessError as e:
-                        test_failure_info[scriptname] = e
+                        test_failure_info[fullscriptcmd] = e
                         #print "CalledProcessError for test %s: %s" % (scriptname, e)
-                    execution_time[scriptname] = int(time.time() - time0)
-                    print "Duration: %s s\n" % execution_time[scriptname]
+                    execution_time[fullscriptcmd] = int(time.time() - time0)
+                    print "Duration: %s s\n" % execution_time[fullscriptcmd]
                 else:
                     print "Skipping extended test name %s - already executed in regular\n" % scriptname
 
