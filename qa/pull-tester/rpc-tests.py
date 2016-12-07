@@ -221,6 +221,8 @@ def runtests():
     execution_time = {}
     test_passed = {}
     test_failure_info = {}
+    disabled = 0
+    skipped = 0
 
     run_only_extended = option_passed('only-extended') or option_passed('extended-only')
 
@@ -262,8 +264,10 @@ def runtests():
 
                 if testScripts[i].is_disabled():
                     print("Disabled testscript %s%s%s (reason: %s)" % (bold[1], testScripts[i], bold[0], testScripts[i].reason))
+                    disabled += 1
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScripts[i], bold[0], testScripts[i].reason))
+                    skipped += 1
                 else:
                     # not disabled or skipped - execute test (or print help if requested)
 
@@ -303,8 +307,10 @@ def runtests():
 
                 if testScriptsExt[i].is_disabled():
                     print("Disabled testscript %s%s%s (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
+                    disabled += 1
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
+                    skipped += 1
                 elif scriptname not in execution_time.keys():
                     # not disabled or skipped - execute test
                     print(
@@ -331,16 +337,20 @@ def runtests():
             print("Cleaning up coverage data")
             coverage.cleanup()
 
+        # show some overall results and aggregates
         print
         print "%-50s  Status    Time (s)" % "Test"
+        print '-' * 70
         for k in sorted(execution_time.keys()):
             print "%-50s  %-6s    %7s" % (k, "PASS" if test_passed[k] else "FAILED", execution_time[k])
+        print '-' * 70
+        print "%-44s  Total time (s): %7s" % (" ", sum(execution_time.values()))
 
-        # output some aggregate counts
         print
         print "%d test(s) passed / %d test(s) failed / %d test(s) executed" % (test_passed.values().count(True),
                                                                    test_passed.values().count(False),
                                                                    len(test_passed))
+        print "%d test(s) disabled / %d test(s) skipped due to platform" % (disabled, skipped)
 
     else:
         print "No rpc tests to run. Wallet, utils, and bitcoind must all be enabled"
