@@ -219,6 +219,8 @@ def runtests():
     global passOn
     coverage = None
     execution_time = {}
+    test_passed = {}
+    test_failure_info = {}
 
     run_only_extended = option_passed('only-extended') or option_passed('extended-only')
 
@@ -252,6 +254,7 @@ def runtests():
             #print "regular", i, str(testScripts[i]), scriptname
             if ((len(opts) == 0
                     or p.match(passOn)
+                    or option_passed('extended')
                     or option_passed('win')
                     or scriptname in opts
                     or (scriptname + '.py') in opts )
@@ -275,8 +278,14 @@ def runtests():
                     print("Running testscript %s%s%s ..." % (bold[1], testScripts[i], bold[0]))
                     #print "call %d is: %s" % (i, rpcTestDir + repr(testScripts[i]) + flags)
                     time0 = time.time()
-                    subprocess.check_call(
-                        rpcTestDir + repr(testScripts[i]) + flags, shell=True)
+                    test_passed[scriptname] = False
+                    try:
+                        subprocess.check_call(
+                            rpcTestDir + repr(testScripts[i]) + flags, shell=True)
+                        test_passed[scriptname] = True
+                    except subprocess.CalledProcessError as e:
+                        test_failure_info[scriptname] = e
+                        #print "CalledProcessError for test %s: %s" % (scriptname, e)
 
                     # exit if help was called
                     if p.match(passOn):
@@ -303,8 +312,14 @@ def runtests():
                         + "%s%s%s ..." % (bold[1], testScriptsExt[i], bold[0]))
                     #print "call %d is: %s" % (i, rpcTestDir + repr(testScripts[i]) + flags)
                     time0 = time.time()
-                    subprocess.check_call(
-                        rpcTestDir + str(testScriptsExt[i]) + flags, shell=True)
+                    test_passed[scriptname] = False
+                    try:
+                        subprocess.check_call(
+                            rpcTestDir + repr(testScriptsExt[i]) + flags, shell=True)
+                        test_passed[scriptname] = True
+                    except subprocess.CalledProcessError as e:
+                        test_failure_info[scriptname] = e
+                        #print "CalledProcessError for test %s: %s" % (scriptname, e)
                     execution_time[scriptname] = int(time.time() - time0)
                     print "Duration: %s s\n" % execution_time[scriptname]
                 else:
@@ -317,9 +332,15 @@ def runtests():
             coverage.cleanup()
 
         print
-        print "%-50s  Time (s)" % "Test"
+        print "%-50s  Status    Time (s)" % "Test"
         for k in sorted(execution_time.keys()):
-            print "%-50s  %7s" % (k, execution_time[k])
+            print "%-50s  %-6s    %7s" % (k, "PASS" if test_passed[k] else "FAILED", execution_time[k])
+
+        # output some aggregate counts
+        print
+        print "%d test(s) passed / %d test(s) failed / %d test(s) executed" % (test_passed.values().count(True),
+                                                                   test_passed.values().count(False),
+                                                                   len(test_passed))
 
     else:
         print "No rpc tests to run. Wallet, utils, and bitcoind must all be enabled"
