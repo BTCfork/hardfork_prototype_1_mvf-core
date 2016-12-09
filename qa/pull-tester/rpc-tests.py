@@ -79,6 +79,7 @@ test_script_opts = ('--tracerpc',
                     '--tmpdir',
                     '--coveragedir',
                     '--randomseed',
+                    '--mineblock',
                     '--testbinary',
                     '--refbinary')
 
@@ -152,6 +153,7 @@ testScripts = [ RpcTest(t) for t in [
     'mempool_limit',
     'httpbasics',
     'multi_rpc',
+    #Disabled('mvf-core-retarget', "temporary"),  # MVF-Core
     'mvf-core-retarget',  # MVF-Core
     'mvf-core-trig',  # MVF-Core
     'zapwallettxes',
@@ -221,14 +223,13 @@ def runtests():
     execution_time = {}
     test_passed = {}
     test_failure_info = {}
-    disabled = 0
-    skipped = 0
+    disabled = []
+    skipped = []
 
     run_only_extended = option_passed('only-extended') or option_passed('extended-only')
 
     if option_passed('list'):
         if run_only_extended:
-            #for i in range(len(testScriptsExt)):
             for t in testScriptsExt:
                 print t
         else:
@@ -264,10 +265,10 @@ def runtests():
 
                 if testScripts[i].is_disabled():
                     print("Disabled testscript %s%s%s (reason: %s)" % (bold[1], testScripts[i], bold[0], testScripts[i].reason))
-                    disabled += 1
+                    disabled.append(str(testScripts[i]))
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScripts[i], bold[0], testScripts[i].reason))
-                    skipped += 1
+                    skipped.append(str(testScripts[i]))
                 else:
                     # not disabled or skipped - execute test (or print help if requested)
 
@@ -306,10 +307,10 @@ def runtests():
 
                 if testScriptsExt[i].is_disabled():
                     print("Disabled testscript %s%s%s (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
-                    disabled += 1
+                    disabled.append(str(testScriptsExt[i]))
                 elif testScripts[i].is_skipped():
                     print("Skipping testscript %s%s%s on this platform (reason: %s)" % (bold[1], testScriptsExt[i], bold[0], testScriptsExt[i].reason))
-                    skipped += 1
+                    skipped.append(str(testScriptsExt[i]))
                 elif fullscriptcmd not in execution_time.keys():
                     # not disabled, skipped or already executed - run test
                     print(
@@ -341,6 +342,10 @@ def runtests():
         print '-' * 70
         for k in sorted(execution_time.keys()):
             print "%-50s  %-6s    %7s" % (k, "PASS" if test_passed[k] else "FAILED", execution_time[k])
+        for d in disabled:
+            print "%-50s  %-8s" % (d, "DISABLED")
+        for s in skipped:
+            print "%-50s  %-8s" % (s, "SKIPPED")
         print '-' * 70
         print "%-44s  Total time (s): %7s" % (" ", sum(execution_time.values()))
 
@@ -348,7 +353,7 @@ def runtests():
         print "%d test(s) passed / %d test(s) failed / %d test(s) executed" % (test_passed.values().count(True),
                                                                    test_passed.values().count(False),
                                                                    len(test_passed))
-        print "%d test(s) disabled / %d test(s) skipped due to platform" % (disabled, skipped)
+        print "%d test(s) disabled / %d test(s) skipped due to platform" % (len(disabled), len(skipped))
 
     else:
         print "No rpc tests to run. Wallet, utils, and bitcoind must all be enabled"
