@@ -90,7 +90,9 @@ enum
 
 bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned int flags, ScriptError* serror);
 
-uint256 SignatureHash(const CScript &scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
+// MVF-Core begin CSIG extend with chain id
+uint256 SignatureHash(const CScript &scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType, unsigned int nChainId=0);
+// MVF-Core end
 
 class BaseSignatureChecker
 {
