@@ -34,7 +34,7 @@ bool TransactionSignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, 
     else
         hash = SignatureHash(scriptCode, *txTo, nIn, nHashType);
     // MVF-Core end
-    
+
     if (!key.Sign(hash, vchSig))
         return false;
     vchSig.push_back((unsigned char)nHashType);
