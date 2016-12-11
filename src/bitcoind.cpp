@@ -156,7 +156,10 @@ bool AppInit(int argc, char* argv[])
         // Set this early so that parameter interactions go to console
         InitLogging();
         InitParameterInteraction();
-        ForkSetup(Params());  // MVF-Core
+        // MVF-Core begin
+        if (!ForkSetup(Params()))
+            StartShutdown();
+        // MVF-Core end
         fRet = AppInit2(threadGroup, scheduler);
     }
     catch (const std::exception& e) {

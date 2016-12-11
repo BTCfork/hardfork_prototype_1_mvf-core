@@ -12,6 +12,7 @@
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
+#include "mvf-core.h"  // MVF-Core added
 
 using namespace std;
 
@@ -1150,12 +1151,20 @@ bool TransactionSignatureChecker::CheckSig(const vector<unsigned char>& vchSigIn
     int nHashType = vchSig.back();
     vchSig.pop_back();
 
-    // MVF-Core TODO: here we might have to try out pre-fork and post-fork forkids together with nHashType to see if anything fits
-    uint256 sighash = SignatureHash(scriptCode, *txTo, nIn, nHashType);
-
-    if (!VerifySignature(vchSig, pubkey, sighash))
-        return false;
-
+    // MVF-Core begin CSIG
+    // MVF-Core TODO: evaluate if we can accept pre-fork signatures indefinitely
+    uint256 sighash0 = SignatureHash(scriptCode, *txTo, nIn, nHashType);
+    if (isMVFHardForkActive) {
+        uint256 sighash1 = SignatureHash(scriptCode, *txTo, nIn, nHashType, FinalForkId);
+        if (!VerifySignature(vchSig, pubkey, sighash0) && !VerifySignature(vchSig, pubkey, sighash1))
+            return false;
+    }
+    else {
+        if (!VerifySignature(vchSig, pubkey, sighash0))
+            return false;
+    }
+    // MVF-Core end
+    
     return true;
 }
 

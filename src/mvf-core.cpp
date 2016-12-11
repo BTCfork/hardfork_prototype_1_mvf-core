@@ -58,7 +58,7 @@ std::string ForkCmdLineHelp()
 
 
 /** Performs fork-related setup / validation actions when the program starts */
-void ForkSetup(const CChainParams& chainparams)
+bool ForkSetup(const CChainParams& chainparams)
 {
     int defaultForkHeightForNetwork = 0;
     std:string activeNetworkID = chainparams.NetworkIDString();
@@ -87,7 +87,8 @@ void ForkSetup(const CChainParams& chainparams)
     else {
         if (FinalForkId < 0 || FinalForkId > MAX_HARDFORK_SIGHASH_ID) {
             LogPrintf("MVF: Error: specified fork id (%d) is not in range 0..%u\n", FinalForkId, (unsigned)MAX_HARDFORK_SIGHASH_ID);
-            StartShutdown();
+            //StartShutdown();
+            return false;  // caller should shut down
         }
     }
 
@@ -122,6 +123,8 @@ void ForkSetup(const CChainParams& chainparams)
 
     // we should always set the activation flag to false during setup
     isMVFHardForkActive = false;
+
+    return true;
 }
 
 
