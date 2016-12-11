@@ -155,6 +155,7 @@ testScripts = [ RpcTest(t) for t in [
     'multi_rpc',
     #Disabled('mvf-core-retarget', "temporary"),  # MVF-Core
     'mvf-core-retarget',  # MVF-Core
+    'mvf-core-csig',  # MVF-Core
     'mvf-core-trig',  # MVF-Core
     'zapwallettxes',
     'proxy_test',

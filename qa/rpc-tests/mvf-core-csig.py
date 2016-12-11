@@ -24,8 +24,7 @@ from random import randint
 import logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
-# backup block must be > 113 as these blocks are used for context setup
-FORKHEIGHT = 200
+FORKHEIGHT = 120
 
 class ReplayProtectionTest(BitcoinTestFramework):
 
@@ -62,45 +61,6 @@ class ReplayProtectionTest(BitcoinTestFramework):
         sync_mempools(self.nodes)
         assert_equal(txid in self.nodes[to_node].getrawmempool(), expect_to_succeed)
         return txid
-
-    def one_send(self, from_node, to_address):
-        amount = Decimal(1) / Decimal(10)
-        self.nodes[from_node].sendtoaddress(to_address, amount)
-
-    def do_one_round(self):
-        a0 = self.nodes[0].getnewaddress()
-        a1 = self.nodes[1].getnewaddress()
-        a2 = self.nodes[2].getnewaddress()
-        a3 = self.nodes[3].getnewaddress()
-
-        self.one_send(0, a1)
-        self.one_send(0, a2)
-        self.one_send(0, a3)
-        self.one_send(1, a0)
-        self.one_send(1, a2)
-        self.one_send(1, a3)
-        self.one_send(2, a0)
-        self.one_send(2, a1)
-        self.one_send(2, a3)
-        self.one_send(3, a0)
-        self.one_send(3, a1)
-        self.one_send(3, a2)
-
-        # sync mempools
-        sync_mempools(self.nodes)
-
-    def start_four(self):
-        for i in range(4):
-            self.nodes[i] = start_node(i, self.options.tmpdir, self.extra_args[i])
-        connect_nodes(self.nodes[0], 3)
-        connect_nodes(self.nodes[1], 3)
-        connect_nodes(self.nodes[2], 3)
-
-    def stop_four(self):
-        stop_node(self.nodes[0], 0)
-        stop_node(self.nodes[1], 1)
-        stop_node(self.nodes[2], 2)
-        stop_node(self.nodes[3], 3)
 
     def run_test(self):
         logging.info("Fork height configured for block %s"%(FORKHEIGHT))
@@ -185,7 +145,22 @@ class ReplayProtectionTest(BitcoinTestFramework):
             for n in range(4):
                 assert_equal(tx in mempools[n], False)
 
-        # TODO: check that now, only nodes of the same kind can transact
+        # check that now, only nodes of the same kind can transact
+        # these pairs should work fine
+        self.send_and_check(0, 1, True)
+        self.send_and_check(1, 0, True)
+        self.send_and_check(2, 3, True)
+        self.send_and_check(3, 2, True)
+
+        # these should not work anymore
+        self.send_and_check(0, 2, False)
+        self.send_and_check(0, 3, False)
+        self.send_and_check(1, 2, False)
+        self.send_and_check(1, 3, False)
+        self.send_and_check(2, 0, False)
+        self.send_and_check(2, 1, False)
+        self.send_and_check(3, 0, False)
+        self.send_and_check(3, 1, False)
 
 if __name__ == '__main__':
     ReplayProtectionTest().main()
