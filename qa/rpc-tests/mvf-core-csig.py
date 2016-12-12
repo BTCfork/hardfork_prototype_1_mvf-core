@@ -193,13 +193,11 @@ class ReplayProtectionTest(BitcoinTestFramework):
 
 
         # MVF-Core TODO: decide whether to accept old-style signatures post-fork (maybe limited-time only?)
-        # commented out the transactions sent from old -> new nodes, for now
-        # because they are still accepted by post-fork nodes (due to
-        # signature verification trying forkid=0 in addition to post-fork id)
-        #for pair in ((0,2), (0,3), (1,2), (1,3), (2,0), (2,1), (3,0), (3,1)):
+        # if you only want to deny new->old, then use the commented out code
+        #for pair in ((2,0), (2,1), (3,0), (3,1)):
 
-        # only the forked->unforked direction is completely blocked for now
-        for pair in ((2,0), (2,1), (3,0), (3,1)):
+        # check both forked->unforked and vice versa are blocked now
+        for pair in ((0,2), (0,3), (1,2), (1,3), (2,0), (2,1), (3,0), (3,1)):
             #logging.info("... from %d to %d" %(pair[0], pair[1]))
             print("... from %d to %d" %(pair[0], pair[1]))
             self.send_and_check(pair[0], pair[1], expect_to_succeed=False, force_sync=False, check=True, check_for_fail=True)

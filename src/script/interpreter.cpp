@@ -1156,7 +1156,10 @@ bool TransactionSignatureChecker::CheckSig(const vector<unsigned char>& vchSigIn
     uint256 sighash0 = SignatureHash(scriptCode, *txTo, nIn, nHashType);
     if (isMVFHardForkActive) {
         uint256 sighash1 = SignatureHash(scriptCode, *txTo, nIn, nHashType, FinalForkId);
-        if (!VerifySignature(vchSig, pubkey, sighash0) && !VerifySignature(vchSig, pubkey, sighash1))
+        // MVF-Core CSIG TODO: remove the commented out code if we decide we do
+        // not need to accept old-style signatures at all after the fork
+        //if (!VerifySignature(vchSig, pubkey, sighash0) && !VerifySignature(vchSig, pubkey, sighash1))
+        if (!VerifySignature(vchSig, pubkey, sighash1))
             return false;
     }
     else {
