@@ -19,7 +19,11 @@ from datetime import datetime
 HARDFORK_RETARGET_BLOCKS = 180*144
 FORK_BLOCK = 2017
 
-class MVF_RETARGET_Test(BitcoinTestFramework):
+class MVF_RETARGET_BlockHeight_Test(BitcoinTestFramework):
+
+    def add_options(self, parser):
+        parser.add_option("--quick", dest="quick", default=False, action="store_true",
+        help="Run shortened version of test")
 
     def setup_chain(self):
         print("Initializing test directory " + self.options.tmpdir)
@@ -83,8 +87,16 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
         last_retarget_block_timestamp = self.nodes[0].getblock(best_block_hash, True)['time']
         last_wallclock_timestamp = time.time()
 
+        if self.options.quick:
+            # used for CI - just test one day after fork
+            # this is basically just to test reset and initial response
+            number_of_blocks_to_test_after_fork = 144
+        else:
+            # full range
+            number_of_blocks_to_test_after_fork = HARDFORK_RETARGET_BLOCKS + 2016
+
         # start generating MVF blocks with varying time stamps
-        for n in xrange(HARDFORK_RETARGET_BLOCKS + 2016):
+        for n in xrange(number_of_blocks_to_test_after_fork):
             best_block_hash = self.nodes[0].getbestblockhash()
             best_block = self.nodes[0].getblock(best_block_hash, True)
             prev_block = self.nodes[0].getblock(best_block['previousblockhash'], True)
@@ -205,4 +217,4 @@ class MVF_RETARGET_Test(BitcoinTestFramework):
         #raw_input() # uncomment here to pause shutdown and check the logs
 
 if __name__ == '__main__':
-    MVF_RETARGET_Test().main()
+    MVF_RETARGET_BlockHeight_Test().main()
