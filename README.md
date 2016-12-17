@@ -1,7 +1,7 @@
 Bitcoin Core integration/staging tree
 =====================================
 
-[![Build Status](https://travis-ci.org/bitcoin/bitcoin.svg?branch=master)](https://travis-ci.org/bitcoin/bitcoin)
+[![Build Status](https://travis-ci.org/BTCfork/hardfork_prototype_1_mvf-core.svg?branch=master)](https://travis-ci.org/BTCfork/hardfork_prototype_1_mvf-core)
 
 https://bitcoincore.org
 
