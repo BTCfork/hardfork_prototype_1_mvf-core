@@ -27,6 +27,7 @@ HARDFORK_MAX_BLOCK_SIZE = 2000000,   // the fork's new maximum block size, in by
 HARDFORK_HEIGHT_MAINNET =  666666,   // operational network trigger height
 HARDFORK_HEIGHT_TESTNET = 9999999,   // public test network trigger height
 HARDFORK_HEIGHT_REGTEST =  999999,   // regression test network (local)  trigger height
+HARDFORK_HEIGHT_BFGTEST = 9999999,   // btcforks genesis test network trigger height
 
 // MVHF-CORE-DES-DIAD-3 / MVHF-CORE-DES-DIAD-4
 // period (in blocks) from fork activation until retargeting returns to normal
@@ -37,6 +38,7 @@ HARDFORK_RETARGET_BLOCKS = 25920,    // 180*144 blocks
 HARDFORK_PORT_MAINNET = 9542,        // default post-fork port on operational network (mainnet)
 HARDFORK_PORT_TESTNET = 9543,        // default post-fork port on public test network (testnet)
 HARDFORK_PORT_REGTEST = 19655,       // default post-fork port on local regression test network (regtestnet)
+HARDFORK_PORT_BFGTEST = 19988,       // default post-fork port on btcforks genesis test network (bfgtest)
 
 // MVHF-CORE-DES-CSIG-1 - signature change parameter defaults
 HARDFORK_SIGHASH_ID = 0x555000,      // 3 byte fork id that is left-shifted by 8 bits and then ORed with the SIGHASHes
@@ -61,6 +63,7 @@ static const CMessageHeader::MessageStartChars pchMessageStart_HardForkMainnet  
 // values to which powLimit is reset at fork time on various networks (MVHF-CORE-DES-DIAD-2):
 static const uint256 HARDFORK_POWRESET_MAINNET = uint256S("00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // mainnet
                      HARDFORK_POWRESET_TESTNET = uint256S("007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // testnet
+                     HARDFORK_POWRESET_BFGTEST = uint256S("007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),  // bfgtest
                      HARDFORK_POWRESET_REGTEST = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // regtestnet
 
 // MVHF-CORE-DES-TRIG-10 - config file that is written when forking, and used to detect "forked" condition at start
