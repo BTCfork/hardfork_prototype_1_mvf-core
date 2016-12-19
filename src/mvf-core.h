@@ -17,6 +17,9 @@ extern int FinalForkId;                         // MVHF-CORE-DES-CSIG-1
 extern bool fAutoBackupDone;                    // MVHF-CORE-DES-WABU-1
 extern std::string autoWalletBackupSuffix;      // MVHF-CORE-DES-WABU-1
 
+// version string identifying the consensus-relevant algorithmic changes
+// so that a user can quickly see if fork clients are compatible
+extern std::string post_fork_consensus_id;
 
 // default values that can be easily put into an enum
 enum {
