@@ -72,7 +72,7 @@ void ForkSetup(const CChainParams& chainparams)
     std:string activeNetworkID = chainparams.NetworkIDString();
 
     LogPrintf("%s: MVF: doing setup\n", __func__);
-    LogPrintf("%s: MVF: consensus version = %s\n", __func__, post_fork_consensus_id);
+    LogPrintf("%s: MVF: fork consensus code = %s\n", __func__, post_fork_consensus_id);
     LogPrintf("%s: MVF: active network = %s\n", __func__, activeNetworkID);
 
     // determine minimum fork height according to network
