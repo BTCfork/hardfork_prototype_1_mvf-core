@@ -29,11 +29,11 @@ HARDFORK_MAX_BLOCK_SIZE = 2000000,   // the fork's new maximum block size, in by
 // MVF-Core TODO: choose values with some consideration instead of dummy values
 HARDFORK_HEIGHT_MAINNET =  666666,   // operational network trigger height
 HARDFORK_HEIGHT_TESTNET = 9999999,   // public test network trigger height
-HARDFORK_HEIGHT_REGTEST =  999999,   // regression test network (local)  trigger height
+HARDFORK_HEIGHT_REGTEST = 9999999,   // regression test network (local)  trigger height
 
 // MVHF-CORE-DES-DIAD-3 / MVHF-CORE-DES-DIAD-4
 // period (in blocks) from fork activation until retargeting returns to normal
-HARDFORK_RETARGET_BLOCKS = 25920,    // 180*144 blocks
+HARDFORK_RETARGET_BLOCKS = 180*144,    // number of blocks during which special fork retargeting is active
 
 // MVHF-CORE-DES-NSEP-1 - network separation parameter defaults
 // MVF-Core TODO: re-check that these port values could be used
