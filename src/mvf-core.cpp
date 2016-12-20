@@ -15,6 +15,16 @@
 
 using namespace std;
 
+// version string identifying the consensus-relevant algorithmic changes
+// so that a user can quickly see if MVF fork clients are compatible
+// for test purposes (since they may diverge during development/testing).
+// A new value must be chosen whenever there are changes to consensus
+// relevant functionality (excepting things which are parameterized).
+// Values are surnames chosen from the name list of space travelers at
+// https://en.wikipedia.org/wiki/List_of_space_travelers_by_name
+// already used: AKIYAMA (add current one to the list when replacing)
+std::string post_fork_consensus_id = "YAMAZAKI";
+
 // actual fork height, taking into account user configuration parameters (MVHF-CORE-DES-TRIG-4)
 int FinalActivateForkHeight = 0;
 
@@ -60,26 +70,34 @@ std::string ForkCmdLineHelp()
 /** Performs fork-related setup / validation actions when the program starts */
 void ForkSetup(const CChainParams& chainparams)
 {
-    int defaultForkHeightForNetwork = 0;
+    int minForkHeightForNetwork = 0;
     std:string activeNetworkID = chainparams.NetworkIDString();
 
     LogPrintf("%s: MVF: doing setup\n", __func__);
+    LogPrintf("%s: MVF: fork consensus code = %s\n", __func__, post_fork_consensus_id);
     LogPrintf("%s: MVF: active network = %s\n", __func__, activeNetworkID);
 
     // determine minimum fork height according to network
     // (these are set to the same as the default fork heights for now, but could be made different)
     if (activeNetworkID == CBaseChainParams::MAIN)
-        defaultForkHeightForNetwork = HARDFORK_HEIGHT_MAINNET;
+        minForkHeightForNetwork = HARDFORK_HEIGHT_MAINNET;
     else if (activeNetworkID == CBaseChainParams::TESTNET)
-        defaultForkHeightForNetwork = HARDFORK_HEIGHT_TESTNET;
+        minForkHeightForNetwork = HARDFORK_HEIGHT_TESTNET;
     else if (activeNetworkID == CBaseChainParams::REGTEST)
-        defaultForkHeightForNetwork = HARDFORK_HEIGHT_REGTEST;
+        minForkHeightForNetwork = HARDFORK_HEIGHT_REGTEST;
     else if (activeNetworkID == CBaseChainParams::BFGTEST)
-        defaultForkHeightForNetwork = HARDFORK_HEIGHT_BFGTEST;
+        minForkHeightForNetwork = HARDFORK_HEIGHT_BFGTEST;
     else
         throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, activeNetworkID));
 
-    FinalActivateForkHeight = GetArg("-forkheight", defaultForkHeightForNetwork);
+    FinalActivateForkHeight = GetArg("-forkheight", minForkHeightForNetwork);
+
+    // shut down immediately if specified fork height is invalid
+    if (FinalActivateForkHeight <= 0)
+    {
+        LogPrintf("MVF: Error: specified fork height (%d) is less than minimum for '%s' network (%d)\n", FinalActivateForkHeight, activeNetworkID, minForkHeightForNetwork);
+        StartShutdown();
+    }
 
     FinalForkId = GetArg("-forkid", HARDFORK_SIGHASH_ID);
     // check fork id for validity (MVHF-CORE-DES-CSIG-2)
