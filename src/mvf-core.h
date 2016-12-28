@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 // MVF-Core common declarations
+
 #pragma once
 #ifndef BITCOIN_MVF_CORE_H
 #define BITCOIN_MVF_CORE_H
@@ -21,6 +22,13 @@ extern std::string autoWalletBackupSuffix;      // MVHF-CORE-DES-WABU-1
 // version string identifying the consensus-relevant algorithmic changes
 // so that a user can quickly see if fork clients are compatible
 extern std::string post_fork_consensus_id;
+
+// CAUTION! certain constant definitions from this file are parsed
+// and extracted by the Python test framework (util.py).
+// Usually there should be notes documenting where values have to
+// respect a certain format, but please tread carefully with the
+// formatting and do not just refactor the C++ names without
+// modifying the Python code.
 
 // default values that can be easily put into an enum
 enum {
