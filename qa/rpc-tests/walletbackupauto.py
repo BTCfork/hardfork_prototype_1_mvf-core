@@ -320,7 +320,7 @@ class WalletBackupTest(BitcoinTestFramework):
         logging.info("Stopping all nodes")
         self.stop_four()
         for n in xrange(4):
-            os.unlink(os.path.join(tmpdir,"node%s" % n,"btcfork.conf"))
+            os.unlink(os.path.join(tmpdir,"node%s" % n,BTCFORK_CONF_FILENAME))
         logging.info("Erasing blockchain on node 2 while keeping backup file")
         shutil.rmtree(self.options.tmpdir + "/node2/regtest/blocks")
         shutil.rmtree(self.options.tmpdir + "/node2/regtest/chainstate")
@@ -352,7 +352,7 @@ class WalletBackupTest(BitcoinTestFramework):
         self.nodes[2].generate(backupblock+1)
         logging.info("Checksum ok - shutting down")
         stop_node(self.nodes[2], 2)
-        os.unlink(os.path.join(tmpdir,"node2","btcfork.conf"))
+        os.unlink(os.path.join(tmpdir,"node2",BTCFORK_CONF_FILENAME))
         self.start_four()
 
         # test that wallet backup is not performed again if fork has already
@@ -366,7 +366,7 @@ class WalletBackupTest(BitcoinTestFramework):
         os.remove(node1backupfile)
         # check that no wallet backup file created
         logging.info("restarting node 1")
-        os.unlink(os.path.join(tmpdir,"node1","btcfork.conf"))
+        os.unlink(os.path.join(tmpdir,"node1",BTCFORK_CONF_FILENAME))
         self.nodes[1] = start_node(1, self.options.tmpdir, ["-keypool=100",
                                                             "-autobackupwalletpath=filenameonly.@.bak",
                                                             "-forkheight=%s"%(backupblock+1),

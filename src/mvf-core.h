@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 // MVF-Core common declarations
+
 #pragma once
 #ifndef BITCOIN_MVF_CORE_H
 #define BITCOIN_MVF_CORE_H
@@ -11,6 +12,7 @@
 class CChainParams;
 
 extern int FinalActivateForkHeight;             // MVHF-CORE-DES-TRIG-4
+extern unsigned FinalDifficultyDropFactor;      // MVF-Core TODO: MVHF-CORE-DES-DIAD-?
 extern bool wasMVFHardForkPreviouslyActivated;  // MVHF-CORE-DES-TRIG-5
 extern bool isMVFHardForkActive;                // MVHF-CORE-DES-TRIG-5
 extern int FinalForkId;                         // MVHF-CORE-DES-CSIG-1
@@ -21,12 +23,20 @@ extern std::string autoWalletBackupSuffix;      // MVHF-CORE-DES-WABU-1
 // so that a user can quickly see if fork clients are compatible
 extern std::string post_fork_consensus_id;
 
+// CAUTION! certain constant definitions from this file are parsed
+// and extracted by the Python test framework (util.py).
+// Usually there should be notes documenting where values have to
+// respect a certain format, but please tread carefully with the
+// formatting and do not just refactor the C++ names without
+// modifying the Python code.
+
 // default values that can be easily put into an enum
 enum {
 // MVHF-CORE-DES-TRIG-1 - trigger related parameter defaults
 // MVF-CORE TODO: choose values with some consideration instead of dummy values
 HARDFORK_MAX_BLOCK_SIZE = 2000000,   // the fork's new maximum block size, in bytes
 // MVF-Core TODO: choose values with some consideration instead of dummy values
+// must be digit-only numerals (no operators) since they are read in by Python test framework
 HARDFORK_HEIGHT_MAINNET =  666666,   // operational network trigger height
 HARDFORK_HEIGHT_TESTNET = 9999999,   // public test network trigger height
 HARDFORK_HEIGHT_REGTEST = 9999999,   // regression test network (local)  trigger height
@@ -34,14 +44,22 @@ HARDFORK_HEIGHT_REGTEST = 9999999,   // regression test network (local)  trigger
 // MVHF-CORE-DES-DIAD-3 / MVHF-CORE-DES-DIAD-4
 // period (in blocks) from fork activation until retargeting returns to normal
 HARDFORK_RETARGET_BLOCKS = 180*144,    // number of blocks during which special fork retargeting is active
+// default drop factors for various networks (MVF-Core TODO: design reference)
+// must be digit-only numerals  (no operators) since they are read in by Python test framework
+MAX_HARDFORK_DROPFACTOR = 1000000,     // maximum drop factor
+HARDFORK_DROPFACTOR_MAINNET = 100000,  // default difficulty drop on operational network (mainnet)
+HARDFORK_DROPFACTOR_TESTNET = 10000,   // default difficulty drop on public test network (testnet)
+HARDFORK_DROPFACTOR_REGTEST = 4,       // default difficulty drop on local regression test network (regtestnet)
 
 // MVHF-CORE-DES-NSEP-1 - network separation parameter defaults
 // MVF-Core TODO: re-check that these port values could be used
+// must be digit-only numerals (no operators) since they are read in by Python test framework
 HARDFORK_PORT_MAINNET = 9542,        // default post-fork port on operational network (mainnet)
 HARDFORK_PORT_TESTNET = 9543,        // default post-fork port on public test network (testnet)
 HARDFORK_PORT_REGTEST = 19655,       // default post-fork port on local regression test network (regtestnet)
 
 // MVHF-CORE-DES-CSIG-1 - signature change parameter defaults
+// must be hex numerals (0x prefix) since they are read in and converted from hex by Python test framework
 HARDFORK_SIGHASH_ID = 0x555000,      // 3 byte fork id that is left-shifted by 8 bits and then ORed with the SIGHASHes
 MAX_HARDFORK_SIGHASH_ID = 0xFFFFFF,  // fork id may not exceed maximum representable in 3 bytes
 };
@@ -55,7 +73,6 @@ MAX_HARDFORK_SIGHASH_ID = 0xFFFFFF,  // fork id may not exceed maximum represent
 // MVF-Core TODO: Clarify why it's ok for testnet to deviate from the above rationale.
 //              One would expect regtestnet to be less important than a public network!
 static const CMessageHeader::MessageStartChars pchMessageStart_HardForkMainnet  = { 0xf9, 0xbe, 0xb4, 0xd9 },
-                                               pchMessageStart_HardForkNolnet   = { 0xfa, 0xce, 0xc4, 0xe9 },
                                                pchMessageStart_HardForkTestnet  = { 0x0b, 0x11, 0x09, 0x07 },
                                                pchMessageStart_HardForkRegtest  = { 0xf9, 0xbe, 0xb4, 0xd9 };
 
