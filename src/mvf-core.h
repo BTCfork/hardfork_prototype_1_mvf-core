@@ -107,7 +107,7 @@ extern boost::filesystem::path MVFGetConfigFile();  // get the full path to the 
 extern void ForkSetup(const CChainParams& chainparams);  // actions to perform at program setup (parameter validation etc.)
 extern void ActivateFork(int actualForkHeight, bool doBackup=true);  // actions to perform at fork triggering (MVHF-CORE-DES-TRIG-6)
 extern void DeactivateFork(void);  // actions to revert if reorg deactivates fork (MVHF-CORE-DES-TRIG-7)
-extern std::string MVFexpandWalletAutoBackupPath(const std::string& strDest, const std::string& strWalletFile, int BackupBlock, bool createDirs=true); // returns the finalized path of the auto wallet backup file (MVHF-BU-DES-WABU-2)
+extern std::string MVFexpandWalletAutoBackupPath(const std::string& strDest, const std::string& strWalletFile, int BackupBlock, bool createDirs=true); // returns the finalized path of the auto wallet backup file (MVHF-CORE-DES-WABU-2)
 extern std::string MVFGetArg(const std::string& strArg, const std::string& strDefault);
 extern int64_t MVFGetArg(const std::string& strArg, int64_t nDefault);
 extern bool MVFGetBoolArg(const std::string& strArg, bool fDefault);
