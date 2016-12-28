@@ -34,6 +34,10 @@ HARDFORK_HEIGHT_REGTEST = 9999999,   // regression test network (local)  trigger
 // MVHF-CORE-DES-DIAD-3 / MVHF-CORE-DES-DIAD-4
 // period (in blocks) from fork activation until retargeting returns to normal
 HARDFORK_RETARGET_BLOCKS = 180*144,    // number of blocks during which special fork retargeting is active
+// default drop factors for various networks (MVF-Core TODO: design reference)
+HARDFORK_DROPFACTOR_MAINNET = 10000,       // default difficulty drop on operational network (mainnet)
+HARDFORK_DROPFACTOR_TESTNET = 1000,        // default difficulty drop on public test network (testnet)
+HARDFORK_DROPFACTOR_REGTEST = 4,           // default difficulty drop on local regression test network (regtestnet)
 
 // MVHF-CORE-DES-NSEP-1 - network separation parameter defaults
 // MVF-Core TODO: re-check that these port values could be used
