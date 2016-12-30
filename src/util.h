@@ -137,6 +137,7 @@ boost::filesystem::path GetTempPath();
 void OpenDebugLog();
 void ShrinkDebugFile();
 void runCommand(const std::string& strCommand);
+extern bool InterpretBool(const std::string& strValue);  // MVF-Core: make extern, used by MVFGetBoolArg
 
 inline bool IsSwitchChar(char c)
 {
