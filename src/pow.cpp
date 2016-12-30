@@ -142,7 +142,7 @@ unsigned int GetMVFNextWorkRequired(const CBlockIndex* pindexLast, const CBlockH
             }
             return pindexLast->nBits;
         }
-        LogPrintf("MVF RETARGET");
+        LogPrintf("MVF RETARGET\n");
         return CalculateMVFNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
 
     } // end fork reset
@@ -225,7 +225,6 @@ unsigned int CalculateMVFResetWorkRequired(const CBlockIndex* pindexLast, int64_
 
     // TODO : Determine best reset formula
     // currently we drop difficulty by a factor (see help for -diffdrop option)
-    // use same formula as standard
     int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
     // used reduced target time span
     int64_t nTargetTimespan = nActualTimespan / FinalDifficultyDropFactor;
