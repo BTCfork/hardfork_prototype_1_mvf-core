@@ -144,6 +144,7 @@ BOOST_AUTO_TEST_CASE(MVFCheckCalculateMVFResetWorkRequired)
     SoftSetBoolArg("-force-retarget", true);
 
     // test for drop factor x4
+    FinalDifficultyDropFactor = HARDFORK_DROPFACTOR_REGTEST;
     BOOST_CHECK_EQUAL(CalculateMVFResetWorkRequired(&pindexLast, nLastRetargetTime, params), 0x1c168fcf);
 }
 // MVF-Core end
