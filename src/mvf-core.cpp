@@ -272,6 +272,7 @@ void ActivateFork(int actualForkHeight, bool doBackup)
             // auto backup was already made pre-fork - emit parameters
             btcforkfile << "autobackupblock=" << GetArg("-autobackupblock", FinalActivateForkHeight - 1) << "\n";
             LogPrintf("%s: MVF: height-based auto backup block = %d\n", __func__, GetArg("-autobackupblock", FinalActivateForkHeight - 1));
+            fAutoBackupDone = true;  // added because otherwise backup can sometimes be re-done
         }
 
         // close fork parameter file
@@ -320,7 +321,7 @@ std::string MVFexpandWalletAutoBackupPath(const std::string& strDest, const std:
 
         if (pathBackupWallet.branch_path() != "" && createDirs)
             // create directories if they don't exist
-            // MVF-BU TODO: this directory creation should be factored out
+            // MVF-Core TODO: this directory creation should be factored out
             // so that we do not need to pass a Boolean arg and this function
             // should not have the side effect. Marked for cleanup.
             boost::filesystem::create_directories(pathBackupWallet.branch_path());
