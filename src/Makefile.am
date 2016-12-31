@@ -201,7 +201,6 @@ libbitcoin_server_a_SOURCES = \
   merkleblock.cpp \
   miner.cpp \
   mvf-core.cpp \
-  mvf-core-globals.cpp \
   mvf-btcfork_conf_parser.cpp \
   net.cpp \
   noui.cpp \
@@ -416,6 +415,7 @@ libbitcoinconsensus_la_SOURCES = \
   hash.cpp \
   primitives/transaction.cpp \
   pubkey.cpp \
+  mvf-core-globals.cpp \
   script/bitcoinconsensus.cpp \
   script/interpreter.cpp \
   script/script.cpp \
