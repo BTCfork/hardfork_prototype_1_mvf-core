@@ -160,6 +160,7 @@ testScripts = [ RpcTest(t) for t in [
     'httpbasics',
     'multi_rpc',
     'mvf-core-retarget --quick',  # MVF-Core
+    'mvf-core-csig',  # MVF-Core
     'mvf-core-trig',  # MVF-Core
     'zapwallettxes',
     'proxy_test',

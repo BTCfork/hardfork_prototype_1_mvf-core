@@ -659,7 +659,10 @@ int main(int argc, char *argv[])
     if (GetBoolArg("-splash", DEFAULT_SPLASHSCREEN) && !GetBoolArg("-min", false))
         app.createSplashScreen(networkStyle.data());
 
-    ForkSetup(Params());  // MVF-Core
+    // MVF-Core begin
+    if (!ForkSetup(Params()))
+        StartShutdown();
+    // MVF-Core end
 
     try
     {

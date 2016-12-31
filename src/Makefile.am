@@ -118,6 +118,7 @@ BITCOIN_CORE_H = \
   merkleblock.h \
   miner.h \
   mvf-core.h \
+  mvf-core-globals.h \
   mvf-btcfork_conf_parser.h \
   net.h \
   netbase.h \
@@ -284,6 +285,7 @@ libbitcoin_common_a_SOURCES = \
   key.cpp \
   keystore.cpp \
   netbase.cpp \
+  mvf-core-globals.cpp \
   primitives/block.cpp \
   primitives/transaction.cpp \
   protocol.cpp \
@@ -413,6 +415,7 @@ libbitcoinconsensus_la_SOURCES = \
   hash.cpp \
   primitives/transaction.cpp \
   pubkey.cpp \
+  mvf-core-globals.cpp \
   script/bitcoinconsensus.cpp \
   script/interpreter.cpp \
   script/script.cpp \

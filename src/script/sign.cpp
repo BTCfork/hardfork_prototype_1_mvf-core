@@ -11,6 +11,7 @@
 #include "primitives/transaction.h"
 #include "script/standard.h"
 #include "uint256.h"
+#include "mvf-core-globals.h"  // MVF-Core added
 
 #include <boost/foreach.hpp>
 
@@ -26,7 +27,14 @@ bool TransactionSignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, 
     if (!keystore->GetKey(address, key))
         return false;
 
-    uint256 hash = SignatureHash(scriptCode, *txTo, nIn, nHashType);
+    // MVF-Core begin CSIG
+    uint256 hash;
+    if (isMVFHardForkActive)
+        hash = SignatureHash(scriptCode, *txTo, nIn, nHashType, FinalForkId);
+    else
+        hash = SignatureHash(scriptCode, *txTo, nIn, nHashType);
+    // MVF-Core end
+
     if (!key.Sign(hash, vchSig))
         return false;
     vchSig.push_back((unsigned char)nHashType);

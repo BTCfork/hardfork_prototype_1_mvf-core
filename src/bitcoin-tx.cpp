@@ -17,6 +17,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include "mvf-core.h"  // MVF-Core added
 
 #include <stdio.h>
 
@@ -357,6 +358,8 @@ vector<unsigned char> ParseHexUO(map<string,UniValue>& o, string strKey)
 
 static void MutateTxSign(CMutableTransaction& tx, const string& flagStr)
 {
+    // MVF-Core TODO: check if this function needs adaptation to be able to produce forked signatures
+
     int nHashType = SIGHASH_ALL;
 
     if (flagStr.size() > 0)
