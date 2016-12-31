@@ -76,15 +76,15 @@ private_double_opts = ('--list',
                        '--force-enable',
                        '--win')
 framework_opts = ('--tracerpc',
-                    '--help',
-                    '--noshutdown',
-                    '--nocleanup',
-                    '--srcdir',
-                    '--tmpdir',
-                    '--coveragedir',
-                    '--randomseed',
-                    '--testbinary',
-                    '--refbinary')
+                  '--help',
+                  '--noshutdown',
+                  '--nocleanup',
+                  '--srcdir',
+                  '--tmpdir',
+                  '--coveragedir',
+                  '--randomseed',
+                  '--testbinary',
+                  '--refbinary')
 test_script_opts = ('--mineblock',
                     '--quick')
 

@@ -1167,7 +1167,7 @@ bool TransactionSignatureChecker::CheckSig(const vector<unsigned char>& vchSigIn
             return false;
     }
     // MVF-Core end
-    
+
     return true;
 }
 
