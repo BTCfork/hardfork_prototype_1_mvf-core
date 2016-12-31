@@ -119,6 +119,7 @@ BITCOIN_CORE_H = \
   miner.h \
   mvf-core.h \
   mvf-core-globals.h \
+  mvf-btcfork_conf_parser.h \
   net.h \
   netbase.h \
   noui.h \
@@ -201,6 +202,7 @@ libbitcoin_server_a_SOURCES = \
   miner.cpp \
   mvf-core.cpp \
   mvf-core-globals.cpp \
+  mvf-btcfork_conf_parser.cpp \
   net.cpp \
   noui.cpp \
   policy/fees.cpp \

@@ -1,4 +1,5 @@
 // Copyright (c) 2015 The Bitcoin Core developers
+// Copyright (c) 2016 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -54,11 +55,7 @@ BOOST_AUTO_TEST_CASE(get_next_work_lower_limit_actual)
     pindexLast.nHeight = 68543;
     pindexLast.nTime = 1279297671;  // Block #68543
     pindexLast.nBits = 0x1c05a3f4;
-    // MVF-Core begin
-    // due to reversal of multiply-divide calculation in CalculateNextWorkRequired,
-    // this rounds slightly differently (change in last digit)
-    BOOST_CHECK_EQUAL(CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, params), 0x1c0168fc);
-    // MVF-Core end
+    BOOST_CHECK_EQUAL(CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, params), 0x1c0168fd);
 }
 
 /* Test the constraint on the upper bound for actual time taken */
@@ -108,7 +105,9 @@ BOOST_AUTO_TEST_CASE(MVFCheckOverflowCalculation_test)
 {
     SelectParams(CBaseChainParams::REGTEST);
     const Consensus::Params& params = Params().GetConsensus();
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit); // MVF-Core moved here
 
+    // test scenario post fork
     FinalActivateForkHeight = 2016;
 
     int64_t nLastRetargetTime = 7;  // Force an excessive retarget time to trigger overflow
@@ -121,7 +120,32 @@ BOOST_AUTO_TEST_CASE(MVFCheckOverflowCalculation_test)
     // need to set -force-retarget, otherwise cannot test overflow
     // because it would never reach the computation
     SoftSetBoolArg("-force-retarget", true);
-    BOOST_CHECK_EQUAL(CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, params), 0x207fffff);
+    BOOST_CHECK_EQUAL(CalculateMVFNextWorkRequired(&pindexLast, nLastRetargetTime, params), bnPowLimit.GetCompact());
+}
+
+/* added unit test for fork reset. doesn't test easily in regtest
+ * because takes some retargets before raising bits off the limit  */
+BOOST_AUTO_TEST_CASE(MVFCheckCalculateMVFResetWorkRequired)
+{
+    SelectParams(CBaseChainParams::REGTEST);
+    const Consensus::Params& params = Params().GetConsensus();
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit); // MVF-Core moved here
+
+    // define last block
+    CBlockIndex pindexLast;
+    pindexLast.nHeight = 68543;
+    pindexLast.nTime = 1279297671;  // Block #68543
+    pindexLast.nBits = 0x1c05a3f4;
+
+    // retarget time for test
+    int64_t nLastRetargetTime = pindexLast.nTime - (params.nPowTargetSpacing * params.DifficultyAdjustmentInterval());
+
+    // force retargeting in CalculateMVFNextWorkRequired
+    SoftSetBoolArg("-force-retarget", true);
+
+    // test for drop factor x4
+    FinalDifficultyDropFactor = HARDFORK_DROPFACTOR_REGTEST;
+    BOOST_CHECK_EQUAL(CalculateMVFResetWorkRequired(&pindexLast, nLastRetargetTime, params), 0x1c168fcf);
 }
 // MVF-Core end
 
