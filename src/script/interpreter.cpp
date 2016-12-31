@@ -12,7 +12,7 @@
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
-#include "mvf-core.h"  // MVF-Core added
+#include "mvf-core-globals.h"  // MVF-Core added
 
 using namespace std;
 
